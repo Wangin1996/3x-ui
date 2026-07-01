@@ -152,6 +152,7 @@ func (a *SUBController) subs(c *gin.Context) {
 	subId := c.Param("subid")
 	scheme, host, hostWithPort, hostHeader := a.subService.ResolveRequest(c)
 	subReq := a.subService.ForRequest(host)
+	subReq.SetRequestOrigin(scheme, hostWithPort)
 	// The remark template's per-client info is for the content a client app
 	// imports — the raw subscription body. A browser viewing the HTML info page
 	// gets clean, name-only remarks (usage is shown in the page summary).

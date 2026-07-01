@@ -28,7 +28,12 @@ import (
 
 // SubService provides business logic for generating subscription links and managing subscription data.
 type SubService struct {
-	address        string
+	address string
+	// scheme and hostWithPort capture the exact public origin the request came
+	// in on (honouring X-Forwarded-Proto/Host), so subscription URLs follow the
+	// address the client actually used — the panel's own port is never guessed.
+	scheme         string
+	hostWithPort   string
 	remarkTemplate string
 	datepicker     string
 	// subscriptionBody is true only when rendering the actual subscription
@@ -70,6 +75,14 @@ func (s *SubService) ForRequest(host string) *SubService {
 	req := *s
 	req.PrepareForRequest(host)
 	return &req
+}
+
+// SetRequestOrigin records the public scheme and host:port the request arrived
+// on so BuildURLs can emit subscription URLs matching what the client used,
+// rather than the panel's configured port.
+func (s *SubService) SetRequestOrigin(scheme, hostWithPort string) {
+	s.scheme = scheme
+	s.hostWithPort = hostWithPort
 }
 
 // PrepareForRequest sets per-request state (host + nodes map) on this
@@ -2377,9 +2390,18 @@ func (s *SubService) BuildURLs(subPath, subJsonPath, subClashPath, subId string)
 	configuredSubJsonURI, _ := s.settingService.GetSubJsonURI()
 	configuredSubClashURI, _ := s.settingService.GetSubClashURI()
 
-	// Same base as the panel's Client Information page; s.address is the
-	// subscriber's host already normalized away from any loopback/bind IP.
+	// Follow the origin the request actually arrived on (public host/scheme/port
+	// via X-Forwarded-*), so a reverse proxy never surfaces the panel's backend
+	// port. Fall back to the settings-derived base only when the request origin
+	// is unknown (non-HTTP callers).
 	base := s.settingService.BuildSubURIBase(s.address)
+	if s.hostWithPort != "" {
+		scheme := s.scheme
+		if scheme == "" {
+			scheme = "http"
+		}
+		base = scheme + "://" + s.hostWithPort
+	}
 
 	subURL = s.buildSingleURL(configuredSubURI, base, subPath, subId)
 
