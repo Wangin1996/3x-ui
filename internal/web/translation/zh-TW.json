@@ -1315,7 +1315,7 @@
       },
       "subFormats": {
         "clashTemplate": "Clash 範本",
-        "clashTemplateDesc": "一份完整的 Clash 設定。節點會自動注入到 proxies,proxy-group 裡值為 PROXIES 的項會被替換為所有節點名。留空則使用內建產生的輸出。",
+        "clashTemplateDesc": "一份完整的 Clash 設定。節點會注入到頂層 proxies;任何留空(proxies: [])的選擇類策略組會自動填入所有節點,你也可以在想要的位置寫 PROXIES;用 use 引用 provider 的組保持不變。整個留空則使用內建產生的輸出。",
         "finalMask": "Final Mask",
         "finalMaskDesc": "注入到每個 JSON 訂閱串流的 xray finalmask 遮罩（TCP/UDP）與 QUIC 調校。需要較新的 xray 用戶端。",
         "packets": "封包",

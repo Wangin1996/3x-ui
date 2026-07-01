@@ -20,6 +20,13 @@ proxy-groups:
     proxies:
       - DIRECT
       - PROXIES
+  - name: Auto
+    type: url-test
+    proxies: []
+  - name: Providers
+    type: select
+    use:
+      - my-provider
 rules:
   - DOMAIN-SUFFIX,example.com,DIRECT
   - MATCH,PROXY
@@ -53,16 +60,24 @@ rules:
 	}
 
 	groups, _ := cfg["proxy-groups"].([]any)
-	if len(groups) != 2 {
-		t.Fatalf("proxy-groups count = %d, want 2", len(groups))
+	if len(groups) != 4 {
+		t.Fatalf("proxy-groups count = %d, want 4", len(groups))
 	}
 	g0 := groups[0].(map[string]any)["proxies"].([]any)
 	if len(g0) != 2 || g0[0] != "N1" || g0[1] != "N2" {
-		t.Fatalf("PROXY group = %v, want [N1 N2]", g0)
+		t.Fatalf("PROXY group (marker) = %v, want [N1 N2]", g0)
 	}
 	g1 := groups[1].(map[string]any)["proxies"].([]any)
 	if len(g1) != 3 || g1[0] != "DIRECT" || g1[1] != "N1" || g1[2] != "N2" {
 		t.Fatalf("Direct group = %v, want [DIRECT N1 N2]", g1)
+	}
+	g2 := groups[2].(map[string]any)["proxies"].([]any)
+	if len(g2) != 2 || g2[0] != "N1" || g2[1] != "N2" {
+		t.Fatalf("Auto group (empty, auto-filled) = %v, want [N1 N2]", g2)
+	}
+	g3 := groups[3].(map[string]any)
+	if _, has := g3["proxies"]; has {
+		t.Fatalf("Providers group (use:) should not get proxies, got %v", g3["proxies"])
 	}
 }
 

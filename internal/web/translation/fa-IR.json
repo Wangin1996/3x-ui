@@ -1317,7 +1317,7 @@
       },
       "subFormats": {
         "clashTemplate": "Clash Template",
-        "clashTemplateDesc": "A full Clash config. Nodes are injected into `proxies`, and any `PROXIES` entry inside a proxy-group is replaced with all node names. Leave empty to use the built-in generated output.",
+        "clashTemplateDesc": "A full Clash config. Your nodes are injected into top-level `proxies`, and any node-selecting group left empty (proxies: []) is auto-filled with all nodes — or write the literal PROXIES where you want them. Groups backed by a provider (use:) are left untouched. Leave empty to use the built-in generated output.",
         "finalMask": "Final Mask",
         "finalMaskDesc": "ماسک‌های finalmask ایکس‌ری (TCP/UDP) و تنظیمات QUIC که داخل همه‌ی stream های اشتراک JSON تزریق می‌شوند. به نسخه‌ی جدید هسته‌ی xray در کلاینت نیاز دارد.",
         "packets": "بسته‌ها",

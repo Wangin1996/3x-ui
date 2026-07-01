@@ -155,10 +155,7 @@ func renderClashTemplate(tmpl string, proxies []map[string]any, names []string) 
 			if !ok {
 				continue
 			}
-			list, ok := group["proxies"].([]any)
-			if !ok {
-				continue
-			}
+			list, _ := group["proxies"].([]any)
 			expanded := make([]any, 0, len(list)+len(names))
 			for _, item := range list {
 				if str, ok := item.(string); ok && str == clashProxiesMarker {
@@ -168,6 +165,18 @@ func renderClashTemplate(tmpl string, proxies []map[string]any, names []string) 
 					continue
 				}
 				expanded = append(expanded, item)
+			}
+			// A node-selecting group left empty (xboard-style templates list
+			// `proxies: []` and expect every node) is filled with all node names,
+			// unless it pulls members from a provider via `use`. Clash rejects a
+			// group with neither.
+			if len(expanded) == 0 {
+				if _, hasUse := group["use"]; hasUse {
+					continue
+				}
+				for _, n := range names {
+					expanded = append(expanded, n)
+				}
 			}
 			group["proxies"] = expanded
 		}
