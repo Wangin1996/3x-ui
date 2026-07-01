@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
@@ -125,9 +126,17 @@ func (a *NodeController) ensureReachable(c *gin.Context, n *model.Node) error {
 	return nil
 }
 
+func nodeMissingPushToken(n *model.Node) bool {
+	return n.Mode != "agent" && n.TlsVerifyMode != "mtls" && strings.TrimSpace(n.ApiToken) == ""
+}
+
 func (a *NodeController) add(c *gin.Context) {
 	n, ok := middleware.BindAndValidate[model.Node](c)
 	if !ok {
+		return
+	}
+	if nodeMissingPushToken(n) {
+		jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.add"), errors.New("api token is required unless TLS verify mode is mtls"))
 		return
 	}
 	if n.Mode != "agent" && n.OutboundTag == "" {
@@ -160,6 +169,10 @@ func (a *NodeController) update(c *gin.Context) {
 	}
 	n, ok := middleware.BindAndValidate[model.Node](c)
 	if !ok {
+		return
+	}
+	if nodeMissingPushToken(n) {
+		jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.update"), errors.New("api token is required unless TLS verify mode is mtls"))
 		return
 	}
 	old, err := a.nodeService.GetById(id)

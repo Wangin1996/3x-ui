@@ -503,10 +503,10 @@ type Node struct {
 	Name                string   `json:"name" form:"name" gorm:"uniqueIndex" validate:"required" example:"de-fra-1"`
 	Remark              string   `json:"remark" form:"remark"`
 	Scheme              string   `json:"scheme" form:"scheme" validate:"omitempty,oneof=http https" example:"https"`
-	Address             string   `json:"address" form:"address" validate:"required" example:"node1.example.com"`
-	Port                int      `json:"port" form:"port" validate:"gte=1,lte=65535" example:"2053"`
+	Address             string   `json:"address" form:"address" validate:"required_unless=Mode agent" example:"node1.example.com"`
+	Port                int      `json:"port" form:"port" validate:"omitempty,gte=1,lte=65535" example:"2053"`
 	BasePath            string   `json:"basePath" form:"basePath" example:"/"`
-	ApiToken            string   `json:"apiToken" form:"apiToken" validate:"required_unless=TlsVerifyMode mtls" example:"abcdef0123456789"`
+	ApiToken            string   `json:"apiToken" form:"apiToken" example:"abcdef0123456789"`
 	Enable              bool     `json:"enable" form:"enable" gorm:"default:true" example:"true"`
 	AllowPrivateAddress bool     `json:"allowPrivateAddress" form:"allowPrivateAddress" gorm:"default:false"`
 	TlsVerifyMode       string   `json:"tlsVerifyMode" form:"tlsVerifyMode" gorm:"column:tls_verify_mode;default:verify" validate:"omitempty,oneof=verify skip pin mtls"`
