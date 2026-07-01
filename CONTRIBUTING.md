@@ -307,8 +307,7 @@ CI runs this for you nightly (and on demand) via `.github/workflows/mutation.yml
 A valid `XUI_PORT` takes precedence over the database-backed `webPort` for the
 current process without changing the stored setting. Unset, empty, whitespace-only,
 malformed, or out-of-range values fall back to `webPort`; invalid configured values
-also produce a warning. With Docker bridge networking, the published container port
-must match the override, for example `XUI_PORT: "8080"` with `ports: ["8080:8080"]`.
+also produce a warning.
 
 ## Issues
 
