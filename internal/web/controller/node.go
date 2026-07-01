@@ -263,6 +263,10 @@ func (a *NodeController) test(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.test"), err)
 		return
 	}
+	if n.Mode == "agent" {
+		jsonObj(c, service.HeartbeatPatch{}.ToUI(true), nil)
+		return
+	}
 	if n.Scheme == "" {
 		n.Scheme = "https"
 	}
