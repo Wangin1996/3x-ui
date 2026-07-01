@@ -1966,6 +1966,14 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 45.1,
         "type": "number"
       },
+      "mode": {
+        "enum": [
+          "push",
+          "agent"
+        ],
+        "example": "push",
+        "type": "string"
+      },
       "name": {
         "example": "de-fra-1",
         "type": "string"
@@ -2073,6 +2081,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "lastHeartbeat",
       "latencyMs",
       "memPct",
+      "mode",
       "name",
       "netDown",
       "netUp",

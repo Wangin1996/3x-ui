@@ -68,6 +68,10 @@ build-fe: ## Build the Vite bundles into internal/web/dist
 build: build-fe ## Build the frontend then the Go binary
 	go build ./...
 
+.PHONY: build-agent
+build-agent: ## Build the lightweight pull-mode node agent (no CGo, no frontend)
+	CGO_ENABLED=0 go build -o x-ui-node ./cmd/x-ui-node
+
 # The PR gate. Matches ci.yml: codegen freshness, both linters, typecheck,
 # both test suites, and a full build.
 .PHONY: verify

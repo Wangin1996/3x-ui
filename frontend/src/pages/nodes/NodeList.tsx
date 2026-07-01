@@ -18,6 +18,7 @@ import {
   ApartmentOutlined,
   ClusterOutlined,
   CloudDownloadOutlined,
+  CodeOutlined,
   DeleteOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
@@ -53,6 +54,7 @@ interface NodeListProps {
   onToggleEnable: (node: NodeRecord, next: boolean) => void;
   onUpdateNode: (node: NodeRecord) => void;
   onUpdateSelected: () => void;
+  onInstallCommand: (node: NodeRecord) => void;
 }
 
 function isUpdateEligible(n: NodeRecord): boolean {
@@ -174,6 +176,7 @@ export default function NodeList({
   onToggleEnable,
   onUpdateNode,
   onUpdateSelected,
+  onInstallCommand,
 }: NodeListProps) {
   const { t } = useTranslation();
   const relativeTime = useRelativeTime();
@@ -245,13 +248,21 @@ export default function NodeList({
         </Tooltip>
       ) : (
         <Space>
-          <Tooltip title={t('pages.nodes.probe')}>
-            <Button type="text" size="small" style={{ fontSize: 16 }} icon={<ThunderboltOutlined />} aria-label={t('pages.nodes.probe')} onClick={() => onProbe(record)} />
-          </Tooltip>
-          {isUpdateEligible(record) && (
-            <Tooltip title={t('pages.nodes.updatePanel')}>
-              <Button type="text" size="small" style={{ fontSize: 16 }} icon={<CloudDownloadOutlined />} aria-label={t('pages.nodes.updatePanel')} onClick={() => onUpdateNode(record)} />
+          {record.mode === 'agent' ? (
+            <Tooltip title={t('pages.nodes.agentInstall.button')}>
+              <Button type="text" size="small" style={{ fontSize: 16 }} icon={<CodeOutlined />} aria-label={t('pages.nodes.agentInstall.button')} onClick={() => onInstallCommand(record)} />
             </Tooltip>
+          ) : (
+            <>
+              <Tooltip title={t('pages.nodes.probe')}>
+                <Button type="text" size="small" style={{ fontSize: 16 }} icon={<ThunderboltOutlined />} aria-label={t('pages.nodes.probe')} onClick={() => onProbe(record)} />
+              </Tooltip>
+              {isUpdateEligible(record) && (
+                <Tooltip title={t('pages.nodes.updatePanel')}>
+                  <Button type="text" size="small" style={{ fontSize: 16 }} icon={<CloudDownloadOutlined />} aria-label={t('pages.nodes.updatePanel')} onClick={() => onUpdateNode(record)} />
+                </Tooltip>
+              )}
+            </>
           )}
           <Tooltip title={t('edit')}>
             <Button type="text" size="small" style={{ fontSize: 16 }} icon={<EditOutlined />} aria-label={t('edit')} onClick={() => onEdit(record)} />
@@ -428,7 +439,7 @@ export default function NodeList({
       width: 120,
       render: (_value, record) => relativeTime(record.lastHeartbeat),
     },
-  ], [t, showAddress, relativeTime, latestVersion, onToggleEnable, onProbe, onEdit, onDelete, onUpdateNode, nameByGuid]);
+  ], [t, showAddress, relativeTime, latestVersion, onToggleEnable, onProbe, onEdit, onDelete, onUpdateNode, onInstallCommand, nameByGuid]);
 
   return (
     <Card size="small" hoverable>

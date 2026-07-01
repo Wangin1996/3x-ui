@@ -365,12 +365,12 @@ func TestSanitizeStreamSettingsForRemote(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.input == "" {
-				if got := sanitizeStreamSettingsForRemote(tc.input); got != "" {
+				if got := SanitizeStreamSettingsForRemote(tc.input); got != "" {
 					t.Errorf("expected empty string, got %q", got)
 				}
 				return
 			}
-			got := sanitizeStreamSettingsForRemote(tc.input)
+			got := SanitizeStreamSettingsForRemote(tc.input)
 			var out map[string]any
 			if err := json.Unmarshal([]byte(got), &out); err != nil {
 				t.Fatalf("output is not valid JSON: %v\noutput: %s", err, got)

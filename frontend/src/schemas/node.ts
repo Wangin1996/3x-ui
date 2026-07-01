@@ -31,6 +31,7 @@ export const NodeRecordSchema = z.object({
   xrayState: z.string().optional(),
   xrayError: z.string().optional(),
   allowPrivateAddress: z.boolean().optional(),
+  mode: z.enum(['push', 'agent']).optional(),
   tlsVerifyMode: z.enum(['verify', 'skip', 'pin', 'mtls']).optional(),
   pinnedCertSha256: z.string().optional(),
   inboundSyncMode: z.enum(['all', 'selected']).optional(),
@@ -60,9 +61,13 @@ export const NodeFormSchema = z.object({
   id: z.number().optional(),
   name: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
   remark: z.string().optional(),
+  // Pull-mode agent nodes dial in to the master, so address/port are
+  // informational and not required; push-mode nodes need a routable target,
+  // enforced in the superRefine below.
+  mode: z.enum(['push', 'agent']).optional().default('push'),
   scheme: z.enum(['http', 'https']),
-  address: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
-  port: z.number().int().min(1).max(65535),
+  address: z.string().trim(),
+  port: z.number().int().max(65535),
   basePath: z.string(),
   // mTLS nodes authenticate via the client certificate, so the token is optional
   // there; every other verify mode still requires one (matches remote.do()).
@@ -77,12 +82,16 @@ export const NodeFormSchema = z.object({
   inboundTags: z.array(z.string()).nullish().transform((tags) => tags ?? []),
   outboundTag: z.string().optional(),
 }).superRefine((val, ctx) => {
-  if (val.tlsVerifyMode !== 'mtls' && val.apiToken.length === 0) {
-    ctx.addIssue({
-      code: 'custom',
-      path: ['apiToken'],
-      message: 'pages.nodes.toasts.fillRequired',
-    });
+  if (val.mode !== 'agent') {
+    if (val.address.length === 0) {
+      ctx.addIssue({ code: 'custom', path: ['address'], message: 'pages.nodes.toasts.fillRequired' });
+    }
+    if (val.port < 1) {
+      ctx.addIssue({ code: 'custom', path: ['port'], message: 'pages.nodes.toasts.fillRequired' });
+    }
+    if (val.tlsVerifyMode !== 'mtls' && val.apiToken.length === 0) {
+      ctx.addIssue({ code: 'custom', path: ['apiToken'], message: 'pages.nodes.toasts.fillRequired' });
+    }
   }
 });
 

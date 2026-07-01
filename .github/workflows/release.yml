@@ -107,6 +107,10 @@ jobs:
           file xui-release
           ldd xui-release || echo "Static binary confirmed"
 
+          # Pull-mode node agent: pure Go, no cgo/toolchain needed.
+          CGO_ENABLED=0 go build -ldflags "-w -s" -o xui-node-release -v ./cmd/x-ui-node
+          file xui-node-release
+
           mkdir x-ui
           cp xui-release x-ui/
           cp x-ui.service.debian x-ui/
@@ -114,6 +118,7 @@ jobs:
           cp x-ui.service.rhel x-ui/
           cp x-ui.sh x-ui/
           mv x-ui/xui-release x-ui/x-ui
+          cp xui-node-release x-ui/x-ui-node
           mkdir x-ui/bin
           cd x-ui/bin
 
@@ -258,11 +263,15 @@ jobs:
           fi
           go build -ldflags "$LDFLAGS" -o xui-release.exe -v main.go
 
+          # Pull-mode node agent: pure Go, no cgo needed.
+          CGO_ENABLED=0 go build -ldflags "-w -s" -o xui-node-release.exe -v ./cmd/x-ui-node
+
       - name: Copy and download resources
         shell: pwsh
         run: |
           mkdir x-ui
           Copy-Item xui-release.exe x-ui\x-ui.exe
+          Copy-Item xui-node-release.exe x-ui\x-ui-node.exe
           mkdir x-ui\bin
           cd x-ui\bin
 

@@ -1992,6 +1992,14 @@
             "example": 45.1,
             "type": "number"
           },
+          "mode": {
+            "enum": [
+              "push",
+              "agent"
+            ],
+            "example": "push",
+            "type": "string"
+          },
           "name": {
             "example": "de-fra-1",
             "type": "string"
@@ -2099,6 +2107,7 @@
           "lastHeartbeat",
           "latencyMs",
           "memPct",
+          "mode",
           "name",
           "netDown",
           "netUp",
@@ -2370,6 +2379,10 @@
     {
       "name": "Nodes",
       "description": "Manage remote 3x-ui panels acting as nodes for a central panel. All endpoints under /panel/api/nodes."
+    },
+    {
+      "name": "Node Agent",
+      "description": "Pull-mode node agents (the x-ui-node binary) dial in here instead of the master pushing to them. The agent identifies itself with the X-Node-Guid header and authenticates by mTLS client certificate or Bearer token; the node must have mode=agent. It pulls its fully rendered Xray config, applies it locally, and reports traffic/online/system state back. All endpoints under /panel/api/agent."
     },
     {
       "name": "Hosts",
@@ -7315,6 +7328,7 @@
                       "lastHeartbeat": 1700000000,
                       "latencyMs": 42,
                       "memPct": 45.1,
+                      "mode": "push",
                       "name": "de-fra-1",
                       "netDown": 2097152,
                       "netUp": 1048576,
@@ -8030,6 +8044,187 @@
             "description": "Bucket size in seconds. Allowed: 2, 30, 60, 120, 180, 300.",
             "schema": {
               "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/agent/config": {
+      "get": {
+        "tags": [
+          "Node Agent"
+        ],
+        "summary": "Return the complete Xray config the agent should run: the shared template (log/api/policy/dns/routing/outbounds) plus only the inbounds assigned to this node, with disabled clients omitted and remote cert file paths stripped. Pass the last applied sha as ?sha= to get {unchanged:true} when nothing changed.",
+        "operationId": "get_panel_api_agent_config",
+        "parameters": [
+          {
+            "name": "X-Node-Guid",
+            "in": "header",
+            "required": true,
+            "description": "This agent node’s stable guid.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sha",
+            "in": "query",
+            "required": false,
+            "description": "Sha256 of the last applied config; echoes back unchanged when it still matches.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "sha256": "3b1f...c9",
+                    "config": {
+                      "log": {},
+                      "inbounds": [],
+                      "outbounds": []
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/agent/report": {
+      "post": {
+        "tags": [
+          "Node Agent"
+        ],
+        "summary": "Ingest the agent’s cumulative per-client traffic (delta-merged by email into the master’s counters), online client set, and system metrics. The response carries cross-panel client totals and a configDirty flag telling the agent to re-pull immediately.",
+        "operationId": "post_panel_api_agent_report",
+        "parameters": [
+          {
+            "name": "X-Node-Guid",
+            "in": "header",
+            "required": true,
+            "description": "This agent node’s stable guid.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "clientTraffics": [
+                  {
+                    "email": "alice",
+                    "up": 1048576,
+                    "down": 2097152,
+                    "lastOnline": 1700000000000
+                  }
+                ],
+                "onlineEmails": [
+                  "alice"
+                ],
+                "sys": {
+                  "cpuPct": 23.5,
+                  "memPct": 45.1,
+                  "uptimeSecs": 86400,
+                  "xrayVersion": "25.10.31",
+                  "xrayState": "running"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "ok": true,
+                    "configDirty": false,
+                    "globals": []
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/agent/ws": {
+      "ws": {
+        "tags": [
+          "Node Agent"
+        ],
+        "summary": "Long-lived WebSocket. The master pushes {\"type\":\"config_changed\"} so the agent re-pulls instantly; the live connection also serves as the node’s liveness signal (online while connected, swept offline when stale). Authenticated like the other agent endpoints.",
+        "operationId": "ws_panel_api_agent_ws",
+        "parameters": [
+          {
+            "name": "X-Node-Guid",
+            "in": "header",
+            "required": true,
+            "description": "This agent node’s stable guid.",
+            "schema": {
+              "type": "string"
             }
           }
         ],

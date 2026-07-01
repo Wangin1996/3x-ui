@@ -678,7 +678,7 @@ func wireInbound(ib *model.Inbound, remoteNodeID int) url.Values {
 	v.Set("port", strconv.Itoa(ib.Port))
 	v.Set("protocol", string(ib.Protocol))
 	v.Set("settings", ib.Settings)
-	v.Set("streamSettings", sanitizeStreamSettingsForRemote(ib.StreamSettings))
+	v.Set("streamSettings", SanitizeStreamSettingsForRemote(ib.StreamSettings))
 	tag := ib.Tag
 	if remoteNodeID > 0 {
 		tag = stripNodeInboundTagPrefix(remoteNodeID, tag)
@@ -709,7 +709,7 @@ func wireInbound(ib *model.Inbound, remoteNodeID int) url.Values {
 // paths are left untouched: the user explicitly entered paths that exist on
 // the remote node's filesystem, and removing them would leave Xray with TLS
 // configured but no certificate, causing Xray to crash on the remote node.
-func sanitizeStreamSettingsForRemote(streamSettings string) string {
+func SanitizeStreamSettingsForRemote(streamSettings string) string {
 	if streamSettings == "" {
 		return streamSettings
 	}

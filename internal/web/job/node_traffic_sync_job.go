@@ -111,7 +111,7 @@ func (j *NodeTrafficSyncJob) Run() {
 	sem := make(chan struct{}, nodeTrafficSyncConcurrency)
 	var wg sync.WaitGroup
 	for _, n := range nodes {
-		if !n.Enable || n.Status != "online" {
+		if !n.Enable || n.Mode == "agent" || n.Status != "online" {
 			continue
 		}
 		wg.Add(1)
@@ -281,7 +281,7 @@ func (j *NodeTrafficSyncJob) maybePushGlobals(mgr *runtime.Manager, nodes []*mod
 	sem := make(chan struct{}, nodeTrafficSyncConcurrency)
 	var wg sync.WaitGroup
 	for _, n := range nodes {
-		if !n.Enable || n.Status != "online" {
+		if !n.Enable || n.Mode == "agent" || n.Status != "online" {
 			continue
 		}
 		remote, err := mgr.RemoteFor(n)

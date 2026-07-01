@@ -1013,6 +1013,49 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'agent',
+    title: 'Node Agent',
+    description:
+      'Pull-mode node agents (the x-ui-node binary) dial in here instead of the master pushing to them. The agent identifies itself with the X-Node-Guid header and authenticates by mTLS client certificate or Bearer token; the node must have mode=agent. It pulls its fully rendered Xray config, applies it locally, and reports traffic/online/system state back. All endpoints under /panel/api/agent.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/agent/config',
+        summary:
+          'Return the complete Xray config the agent should run: the shared template (log/api/policy/dns/routing/outbounds) plus only the inbounds assigned to this node, with disabled clients omitted and remote cert file paths stripped. Pass the last applied sha as ?sha= to get {unchanged:true} when nothing changed.',
+        params: [
+          { name: 'X-Node-Guid', in: 'header', type: 'string', desc: 'This agent node’s stable guid.' },
+          { name: 'sha', in: 'query', type: 'string', desc: 'Sha256 of the last applied config; echoes back unchanged when it still matches.', optional: true },
+        ],
+        response:
+          '{\n  "success": true,\n  "obj": {\n    "sha256": "3b1f...c9",\n    "config": { "log": {}, "inbounds": [], "outbounds": [] }\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/agent/report',
+        summary:
+          'Ingest the agent’s cumulative per-client traffic (delta-merged by email into the master’s counters), online client set, and system metrics. The response carries cross-panel client totals and a configDirty flag telling the agent to re-pull immediately.',
+        params: [
+          { name: 'X-Node-Guid', in: 'header', type: 'string', desc: 'This agent node’s stable guid.' },
+        ],
+        body:
+          '{\n  "clientTraffics": [ { "email": "alice", "up": 1048576, "down": 2097152, "lastOnline": 1700000000000 } ],\n  "onlineEmails": ["alice"],\n  "sys": { "cpuPct": 23.5, "memPct": 45.1, "uptimeSecs": 86400, "xrayVersion": "25.10.31", "xrayState": "running" }\n}',
+        response:
+          '{\n  "success": true,\n  "obj": {\n    "ok": true,\n    "configDirty": false,\n    "globals": []\n  }\n}',
+      },
+      {
+        method: 'WS',
+        path: '/panel/api/agent/ws',
+        summary:
+          'Long-lived WebSocket. The master pushes {"type":"config_changed"} so the agent re-pulls instantly; the live connection also serves as the node’s liveness signal (online while connected, swept offline when stale). Authenticated like the other agent endpoints.',
+        params: [
+          { name: 'X-Node-Guid', in: 'header', type: 'string', desc: 'This agent node’s stable guid.' },
+        ],
+      },
+    ],
+  },
+
+  {
     id: 'hosts',
     title: 'Hosts',
     description:

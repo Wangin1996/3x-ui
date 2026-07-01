@@ -110,6 +110,9 @@ func initModels() error {
 	if err := normalizeInboundSubSortIndex(); err != nil {
 		return err
 	}
+	if err := backfillNodeModeDefault(); err != nil {
+		return err
+	}
 	if IsPostgres() {
 		if err := resyncPostgresSequences(db, models); err != nil {
 			log.Printf("Error resyncing postgres sequences: %v", err)
@@ -117,6 +120,13 @@ func initModels() error {
 		}
 	}
 	return nil
+}
+
+func backfillNodeModeDefault() error {
+	if !db.Migrator().HasColumn(&model.Node{}, "mode") {
+		return nil
+	}
+	return db.Model(&model.Node{}).Where("mode IS NULL OR mode = ''").Update("mode", "push").Error
 }
 
 func dropLegacyForeignKeys() error {

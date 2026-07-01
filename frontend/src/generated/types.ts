@@ -435,6 +435,7 @@ export interface Node {
   lastHeartbeat: number;
   latencyMs: number;
   memPct: number;
+  mode: string;
   name: string;
   netDown: number;
   netUp: number;

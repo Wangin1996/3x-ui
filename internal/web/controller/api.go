@@ -19,6 +19,7 @@ type APIController struct {
 	serverController      *ServerController
 	nodeController        *NodeController
 	hostController        *HostController
+	agentController       *AgentController
 	settingController     *SettingController
 	xraySettingController *XraySettingController
 	userService           panel.UserService
@@ -97,6 +98,13 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	// Hosts API — per-inbound override endpoints for subscription links
 	hosts := api.Group("/hosts")
 	a.hostController = NewHostController(hosts)
+
+	// Agent API — pull-mode node agents authenticate per-node (guid + token) via
+	// the controller's own agentAuth, so it lives outside the session/global-token
+	// checkAPIAuth chain. It keeps the config envelope for zstd + sha handling.
+	agent := g.Group("/panel/api/agent")
+	agent.Use(middleware.ConfigEnvelopeMiddleware())
+	a.agentController = NewAgentController(agent)
 
 	// Settings + Xray config management live under the API surface too, so the
 	// same API token drives them. Paths are /panel/api/setting/* and

@@ -130,7 +130,7 @@ func (a *NodeController) add(c *gin.Context) {
 	if !ok {
 		return
 	}
-	if n.OutboundTag == "" {
+	if n.Mode != "agent" && n.OutboundTag == "" {
 		if err := a.ensureReachable(c, n); err != nil {
 			jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.add"), err)
 			return
@@ -167,7 +167,7 @@ func (a *NodeController) update(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.obtain"), err)
 		return
 	}
-	if n.OutboundTag == "" && old.OutboundTag == "" {
+	if n.Mode != "agent" && n.OutboundTag == "" && old.OutboundTag == "" {
 		if err := a.ensureReachable(c, n); err != nil {
 			jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.update"), err)
 			return

@@ -17,6 +17,7 @@ import (
 const (
 	nodeHeartbeatConcurrency    = 32
 	nodeHeartbeatRequestTimeout = 4 * time.Second
+	agentStaleSeconds           = 90
 )
 
 type NodeHeartbeatJob struct {
@@ -46,7 +47,10 @@ func (j *NodeHeartbeatJob) Run() {
 	sem := make(chan struct{}, nodeHeartbeatConcurrency)
 	var wg sync.WaitGroup
 	for _, n := range nodes {
-		if !n.Enable {
+		if !n.Enable || n.Mode == "agent" {
+			if n.Mode == "agent" {
+				j.sweepAgent(n)
+			}
 			continue
 		}
 		wg.Add(1)
@@ -69,6 +73,24 @@ func (j *NodeHeartbeatJob) Run() {
 		return
 	}
 	websocket.BroadcastNodes(updated)
+}
+
+func (j *NodeHeartbeatJob) sweepAgent(n *model.Node) {
+	if n.Status != "online" {
+		return
+	}
+	if websocket.AgentConnected(n.Id) {
+		return
+	}
+	if time.Now().Unix()-n.LastHeartbeat <= agentStaleSeconds {
+		return
+	}
+	patch := service.HeartbeatPatch{Status: "offline", LastHeartbeat: n.LastHeartbeat, LastError: "agent stopped reporting"}
+	if err := j.nodeService.UpdateHeartbeat(n.Id, patch); err != nil {
+		logger.Warning("node heartbeat: mark agent", n.Id, "offline failed:", err)
+		return
+	}
+	publishNodeTransition(n, n.Status, patch)
 }
 
 func (j *NodeHeartbeatJob) probeOne(n *model.Node) {

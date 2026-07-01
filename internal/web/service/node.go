@@ -23,8 +23,12 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/json_util"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/netsafe"
+	"github.com/mhsanaei/3x-ui/v3/internal/util/random"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/websocket"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+
+	"github.com/google/uuid"
 
 	"gorm.io/gorm"
 )
@@ -336,6 +340,18 @@ func (s *NodeService) GetById(id int) (*model.Node, error) {
 	return n, nil
 }
 
+func (s *NodeService) GetByGuid(guid string) (*model.Node, error) {
+	if guid == "" {
+		return nil, errors.New("empty node guid")
+	}
+	db := database.GetDB()
+	n := &model.Node{}
+	if err := db.Model(model.Node{}).Where("guid = ?", guid).First(n).Error; err != nil {
+		return nil, err
+	}
+	return n, nil
+}
+
 // NodeExists reports whether a node with the given id exists on this panel.
 // Used to drop stale, cross-panel node references on inbound import. A Count
 // query distinguishes "no such node" (count 0, no error) from a real DB error.
@@ -370,24 +386,10 @@ func (s *NodeService) normalize(n *model.Node) error {
 	if n.Name == "" {
 		return common.NewError("node name is required")
 	}
-	addr, err := netsafe.NormalizeHost(n.Address)
-	if err != nil {
-		return common.NewError(err.Error())
+	if n.Mode != "agent" {
+		n.Mode = "push"
 	}
-	n.Address = addr
-	if n.Port <= 0 || n.Port > 65535 {
-		return common.NewError("node port must be 1-65535")
-	}
-	if n.Scheme != "http" && n.Scheme != "https" {
-		n.Scheme = "https"
-	}
-	if n.TlsVerifyMode != "skip" && n.TlsVerifyMode != "pin" && n.TlsVerifyMode != "mtls" {
-		n.TlsVerifyMode = "verify"
-	}
-	if n.TlsVerifyMode == "mtls" && n.Scheme != "https" {
-		return common.NewError("mtls requires the node scheme to be https")
-	}
-	n.PinnedCertSha256 = strings.TrimSpace(n.PinnedCertSha256)
+
 	if n.InboundSyncMode != "selected" {
 		n.InboundSyncMode = "all"
 		n.InboundTags = nil
@@ -407,12 +409,45 @@ func (s *NodeService) normalize(n *model.Node) error {
 		}
 		n.InboundTags = tags
 	}
+	n.BasePath = normalizeBasePath(n.BasePath)
+
+	if n.Mode == "agent" {
+		if strings.TrimSpace(n.Guid) == "" {
+			n.Guid = uuid.NewString()
+		}
+		if n.ApiToken == "" {
+			n.ApiToken = random.Seq(32)
+		}
+		n.Address = strings.TrimSpace(n.Address)
+		if n.Scheme != "http" && n.Scheme != "https" {
+			n.Scheme = "https"
+		}
+		return nil
+	}
+
+	addr, err := netsafe.NormalizeHost(n.Address)
+	if err != nil {
+		return common.NewError(err.Error())
+	}
+	n.Address = addr
+	if n.Port <= 0 || n.Port > 65535 {
+		return common.NewError("node port must be 1-65535")
+	}
+	if n.Scheme != "http" && n.Scheme != "https" {
+		n.Scheme = "https"
+	}
+	if n.TlsVerifyMode != "skip" && n.TlsVerifyMode != "pin" && n.TlsVerifyMode != "mtls" {
+		n.TlsVerifyMode = "verify"
+	}
+	if n.TlsVerifyMode == "mtls" && n.Scheme != "https" {
+		return common.NewError("mtls requires the node scheme to be https")
+	}
+	n.PinnedCertSha256 = strings.TrimSpace(n.PinnedCertSha256)
 	if n.TlsVerifyMode == "pin" {
 		if _, err := runtime.DecodeCertPin(n.PinnedCertSha256); err != nil {
 			return common.NewError(err.Error())
 		}
 	}
-	n.BasePath = normalizeBasePath(n.BasePath)
 	return nil
 }
 
@@ -452,6 +487,9 @@ func (s *NodeService) Update(id int, in *model.Node) error {
 		"inbound_sync_mode":     in.InboundSyncMode,
 		"inbound_tags":          string(inboundTagsJSON),
 		"outbound_tag":          in.OutboundTag,
+	}
+	if existing.Mode == "agent" {
+		updates["api_token"] = existing.ApiToken
 	}
 	if err := db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(model.Node{}).Where("id = ?", id).Updates(updates).Error; err != nil {
@@ -738,7 +776,11 @@ func (s *NodeService) warnOnDuplicateGuid(id int, guid string) {
 }
 
 func (s *NodeService) MarkNodeDirty(id int) error {
-	return s.MarkNodeDirtyTx(database.GetDB(), id)
+	if err := s.MarkNodeDirtyTx(database.GetDB(), id); err != nil {
+		return err
+	}
+	websocket.NotifyAgentConfigChanged(id)
+	return nil
 }
 
 func (s *NodeService) MarkNodeDirtyTx(tx *gorm.DB, id int) error {

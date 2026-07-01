@@ -441,6 +441,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "lastHeartbeat": 1700000000,
     "latencyMs": 42,
     "memPct": 45.1,
+    "mode": "push",
     "name": "de-fra-1",
     "netDown": 2097152,
     "netUp": 1048576,

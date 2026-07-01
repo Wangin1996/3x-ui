@@ -14,6 +14,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/json_util"
+	noderuntime "github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 
 	"go.uber.org/atomic"
@@ -105,6 +106,169 @@ func RemoveIndex(s []any, index int) []any {
 	return append(s[:index], s[index+1:]...)
 }
 
+func (s *XrayService) appendInboundConfig(xrayConfig *xray.Config, inbound *model.Inbound, sanitizeRemoteCerts bool) error {
+	settings := map[string]any{}
+	_ = json.Unmarshal([]byte(inbound.Settings), &settings)
+
+	dbClients, listErr := s.inboundService.clientService.ListForInbound(nil, inbound.Id)
+	if listErr != nil {
+		return listErr
+	}
+
+	clientStats := inbound.ClientStats
+	enableMap := make(map[string]bool, len(clientStats))
+	for _, clientTraffic := range clientStats {
+		enableMap[clientTraffic.Email] = clientTraffic.Enable
+	}
+
+	var finalClients []any
+	var wgPeers []any
+	for i := range dbClients {
+		c := dbClients[i]
+		if enable, exists := enableMap[c.Email]; exists && !enable {
+			logger.Infof("Remove Inbound User %s due to expiration or traffic limit", c.Email)
+			continue
+		}
+		if !c.Enable {
+			continue
+		}
+		flow := c.Flow
+		if flow == "xtls-rprx-vision-udp443" {
+			flow = "xtls-rprx-vision"
+		}
+		entry := map[string]any{"email": c.Email}
+		switch inbound.Protocol {
+		case model.VLESS:
+			if c.ID != "" {
+				entry["id"] = c.ID
+			}
+			if flow != "" {
+				entry["flow"] = flow
+			}
+			if c.Reverse != nil {
+				entry["reverse"] = c.Reverse
+			}
+		case model.VMESS:
+			if c.ID != "" {
+				entry["id"] = c.ID
+			}
+			if c.Security != "" {
+				entry["security"] = c.Security
+			}
+		case model.Trojan:
+			if c.Password != "" {
+				entry["password"] = c.Password
+			}
+			if flow != "" {
+				entry["flow"] = flow
+			}
+		case model.Shadowsocks:
+			if c.Password != "" {
+				entry["password"] = c.Password
+			}
+		case model.Hysteria:
+			if c.Auth != "" {
+				entry["auth"] = c.Auth
+			}
+		case model.WireGuard:
+			peer := map[string]any{"email": c.Email, "level": 0}
+			if c.PublicKey != "" {
+				peer["publicKey"] = c.PublicKey
+			}
+			if len(c.AllowedIPs) > 0 {
+				peer["allowedIPs"] = c.AllowedIPs
+			}
+			if c.PreSharedKey != "" {
+				peer["preSharedKey"] = c.PreSharedKey
+			}
+			if c.KeepAlive > 0 {
+				peer["keepAlive"] = c.KeepAlive
+			}
+			wgPeers = append(wgPeers, peer)
+			continue
+		}
+		finalClients = append(finalClients, entry)
+	}
+
+	var mutated bool
+	if inbound.Protocol == model.WireGuard {
+		delete(settings, "clients")
+		if wgPeers == nil {
+			wgPeers = []any{}
+		}
+		settings["peers"] = wgPeers
+		mutated = true
+	} else {
+		_, hadClients := settings["clients"]
+		mutated = hadClients || len(finalClients) > 0
+		if mutated {
+			settings["clients"] = finalClients
+		}
+	}
+
+	if inboundCanHostFallbacks(inbound) {
+		fallbacks, fbErr := s.inboundService.fallbackService.BuildFallbacksJSON(nil, inbound.Id)
+		if fbErr != nil {
+			return fbErr
+		}
+		if len(fallbacks) > 0 {
+			generic := make([]any, 0, len(fallbacks))
+			for _, f := range fallbacks {
+				generic = append(generic, f)
+			}
+			settings["fallbacks"] = generic
+			mutated = true
+		}
+	}
+
+	if mutated {
+		modifiedSettings, err := json.MarshalIndent(settings, "", "  ")
+		if err != nil {
+			return err
+		}
+		inbound.Settings = string(modifiedSettings)
+	}
+
+	if len(inbound.StreamSettings) > 0 {
+		var stream map[string]any
+		_ = json.Unmarshal([]byte(inbound.StreamSettings), &stream)
+
+		tlsSettings, ok1 := stream["tlsSettings"].(map[string]any)
+		realitySettings, ok2 := stream["realitySettings"].(map[string]any)
+		if ok1 || ok2 {
+			if ok1 {
+				delete(tlsSettings, "settings")
+			} else if ok2 {
+				delete(realitySettings, "settings")
+			}
+		}
+
+		delete(stream, "externalProxy")
+
+		liftXhttpSessionIDKeys(stream)
+
+		newStream, err := json.MarshalIndent(stream, "", "  ")
+		if err != nil {
+			return err
+		}
+		inbound.StreamSettings = string(newStream)
+	}
+
+	if sanitizeRemoteCerts {
+		inbound.StreamSettings = noderuntime.SanitizeStreamSettingsForRemote(inbound.StreamSettings)
+	}
+
+	if inbound.Protocol == model.Shadowsocks {
+		if healed, ok := model.HealShadowsocksClientMethods(inbound.Settings); ok {
+			inbound.Settings = healed
+		}
+	}
+
+	inboundConfig := inbound.GenXrayInboundConfig()
+	xrayConfig.InboundConfigs = append(xrayConfig.InboundConfigs, *inboundConfig)
+	return nil
+}
+
 // GetXrayConfig retrieves and builds the Xray configuration from settings and inbounds.
 func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 	templateConfig, err := s.settingService.GetXrayConfigTemplate()
@@ -133,176 +297,12 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 		return nil, err
 	}
 	for _, inbound := range inbounds {
-		if !inbound.Enable {
+		if !inbound.Enable || inbound.NodeID != nil || inbound.Protocol == model.MTProto {
 			continue
 		}
-		if inbound.NodeID != nil {
-			continue
+		if err := s.appendInboundConfig(xrayConfig, inbound, false); err != nil {
+			return nil, err
 		}
-		if inbound.Protocol == model.MTProto {
-			continue
-		}
-		settings := map[string]any{}
-		_ = json.Unmarshal([]byte(inbound.Settings), &settings)
-
-		dbClients, listErr := s.inboundService.clientService.ListForInbound(nil, inbound.Id)
-		if listErr != nil {
-			return nil, listErr
-		}
-
-		clientStats := inbound.ClientStats
-		enableMap := make(map[string]bool, len(clientStats))
-		for _, clientTraffic := range clientStats {
-			enableMap[clientTraffic.Email] = clientTraffic.Enable
-		}
-
-		var finalClients []any
-		var wgPeers []any
-		for i := range dbClients {
-			c := dbClients[i]
-			if enable, exists := enableMap[c.Email]; exists && !enable {
-				logger.Infof("Remove Inbound User %s due to expiration or traffic limit", c.Email)
-				continue
-			}
-			if !c.Enable {
-				continue
-			}
-			flow := c.Flow
-			if flow == "xtls-rprx-vision-udp443" {
-				flow = "xtls-rprx-vision"
-			}
-			entry := map[string]any{"email": c.Email}
-			switch inbound.Protocol {
-			case model.VLESS:
-				if c.ID != "" {
-					entry["id"] = c.ID
-				}
-				if flow != "" {
-					entry["flow"] = flow
-				}
-				if c.Reverse != nil {
-					entry["reverse"] = c.Reverse
-				}
-			case model.VMESS:
-				if c.ID != "" {
-					entry["id"] = c.ID
-				}
-				if c.Security != "" {
-					entry["security"] = c.Security
-				}
-			case model.Trojan:
-				if c.Password != "" {
-					entry["password"] = c.Password
-				}
-				if flow != "" {
-					entry["flow"] = flow
-				}
-			case model.Shadowsocks:
-				if c.Password != "" {
-					entry["password"] = c.Password
-				}
-			case model.Hysteria:
-				if c.Auth != "" {
-					entry["auth"] = c.Auth
-				}
-			case model.WireGuard:
-				peer := map[string]any{"email": c.Email, "level": 0}
-				if c.PublicKey != "" {
-					peer["publicKey"] = c.PublicKey
-				}
-				if len(c.AllowedIPs) > 0 {
-					peer["allowedIPs"] = c.AllowedIPs
-				}
-				if c.PreSharedKey != "" {
-					peer["preSharedKey"] = c.PreSharedKey
-				}
-				if c.KeepAlive > 0 {
-					peer["keepAlive"] = c.KeepAlive
-				}
-				wgPeers = append(wgPeers, peer)
-				continue
-			}
-			finalClients = append(finalClients, entry)
-		}
-
-		var mutated bool
-		if inbound.Protocol == model.WireGuard {
-			delete(settings, "clients")
-			if wgPeers == nil {
-				wgPeers = []any{}
-			}
-			settings["peers"] = wgPeers
-			mutated = true
-		} else {
-			_, hadClients := settings["clients"]
-			mutated = hadClients || len(finalClients) > 0
-			if mutated {
-				settings["clients"] = finalClients
-			}
-		}
-
-		if inboundCanHostFallbacks(inbound) {
-			fallbacks, fbErr := s.inboundService.fallbackService.BuildFallbacksJSON(nil, inbound.Id)
-			if fbErr != nil {
-				return nil, fbErr
-			}
-			if len(fallbacks) > 0 {
-				generic := make([]any, 0, len(fallbacks))
-				for _, f := range fallbacks {
-					generic = append(generic, f)
-				}
-				settings["fallbacks"] = generic
-				mutated = true
-			}
-		}
-
-		if mutated {
-			modifiedSettings, err := json.MarshalIndent(settings, "", "  ")
-			if err != nil {
-				return nil, err
-			}
-			inbound.Settings = string(modifiedSettings)
-		}
-
-		if len(inbound.StreamSettings) > 0 {
-			// Unmarshal stream JSON
-			var stream map[string]any
-			_ = json.Unmarshal([]byte(inbound.StreamSettings), &stream)
-
-			// Remove the "settings" field under "tlsSettings" and "realitySettings"
-			tlsSettings, ok1 := stream["tlsSettings"].(map[string]any)
-			realitySettings, ok2 := stream["realitySettings"].(map[string]any)
-			if ok1 || ok2 {
-				if ok1 {
-					delete(tlsSettings, "settings")
-				} else if ok2 {
-					delete(realitySettings, "settings")
-				}
-			}
-
-			delete(stream, "externalProxy")
-
-			// xray-core v26.6.22 (#6258) renamed the XHTTP session keys and
-			// kept no fallback. Lift legacy sessionPlacement/sessionKey onto the
-			// new names here so inbounds stored before the rename keep working
-			// without the admin re-saving them.
-			liftXhttpSessionIDKeys(stream)
-
-			newStream, err := json.MarshalIndent(stream, "", "  ")
-			if err != nil {
-				return nil, err
-			}
-			inbound.StreamSettings = string(newStream)
-		}
-
-		if inbound.Protocol == model.Shadowsocks {
-			if healed, ok := model.HealShadowsocksClientMethods(inbound.Settings); ok {
-				inbound.Settings = healed
-			}
-		}
-
-		inboundConfig := inbound.GenXrayInboundConfig()
-		xrayConfig.InboundConfigs = append(xrayConfig.InboundConfigs, *inboundConfig)
 	}
 
 	// Merge subscription-derived outbounds (if any) into the final outbounds array.
@@ -341,6 +341,45 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 		logger.Warning("read nodes for egress injection failed:", err)
 	} else {
 		injectNodeEgresses(xrayConfig, nodes)
+	}
+
+	return xrayConfig, nil
+}
+
+func (s *XrayService) RenderAgentConfig(nodeID int) (*xray.Config, error) {
+	templateConfig, err := s.settingService.GetXrayConfigTemplate()
+	if err != nil {
+		return nil, err
+	}
+
+	xrayConfig := &xray.Config{}
+	if err := json.Unmarshal([]byte(templateConfig), xrayConfig); err != nil {
+		return nil, err
+	}
+	xrayConfig.LogConfig = resolveXrayLogPaths(xrayConfig.LogConfig)
+	xrayConfig.API = ensureAPIServices(xrayConfig.API)
+	xrayConfig.Policy = ensureStatsPolicy(xrayConfig.Policy)
+	xrayConfig.RouterConfig = stripDisabledRules(xrayConfig.RouterConfig)
+	xrayConfig.OutboundConfigs = liftOutboundsXhttpSessionIDKeys(xrayConfig.OutboundConfigs)
+
+	_, _, _ = s.inboundService.AddTraffic(nil, nil)
+
+	inbounds, err := s.inboundService.GetAllInbounds()
+	if err != nil {
+		return nil, err
+	}
+	for _, inbound := range inbounds {
+		if !inbound.Enable || inbound.NodeID == nil || *inbound.NodeID != nodeID || inbound.Protocol == model.MTProto {
+			continue
+		}
+		if err := s.appendInboundConfig(xrayConfig, inbound, true); err != nil {
+			return nil, err
+		}
+	}
+
+	subSvc := &OutboundSubscriptionService{}
+	if prepend, appendList, err := subSvc.activeOutboundsSplit(); err == nil && (len(prepend) > 0 || len(appendList) > 0) {
+		mergeSubscriptionOutbounds(xrayConfig, prepend, appendList)
 	}
 
 	return xrayConfig, nil
@@ -1002,79 +1041,13 @@ func (s *XrayService) tryHotApply(newCfg *xray.Config) bool {
 	}
 	defer hotAPI.Close()
 
-	// Removals first so changed handlers and port swaps never collide with
-	// the additions that follow.
-	for _, tag := range diff.RemovedInboundTags {
-		if err := hotAPI.DelInbound(tag); err != nil && !xray.IsMissingHandlerErr(err) {
-			logger.Info("hot apply: remove inbound [", tag, "] failed:", err)
-			return false
-		}
-	}
-	for _, tag := range diff.RemovedOutboundTags {
-		if err := hotAPI.DelOutbound(tag); err != nil && !xray.IsMissingHandlerErr(err) {
-			logger.Info("hot apply: remove outbound [", tag, "] failed:", err)
-			return false
-		}
-	}
-	for _, ob := range diff.AddedOutbounds {
-		if err := addOutboundReconciling(&hotAPI, ob); err != nil {
-			logger.Info("hot apply: add outbound failed:", err)
-			return false
-		}
-	}
-	for _, ib := range diff.AddedInbounds {
-		if err := addInboundReconciling(&hotAPI, ib); err != nil {
-			logger.Info("hot apply: add inbound failed:", err)
-			return false
-		}
-	}
-	if diff.RoutingConfig != nil {
-		if err := hotAPI.ApplyRoutingConfig(diff.RoutingConfig); err != nil {
-			logger.Info("hot apply: apply routing config failed:", err)
-			return false
-		}
+	if err := xray.ApplyHotDiff(&hotAPI, diff); err != nil {
+		logger.Info("hot apply:", err)
+		return false
 	}
 
 	p.SetConfig(newCfg)
 	return true
-}
-
-// addInboundReconciling adds an inbound, and on a tag conflict (the handler
-// was already created through the runtime API while the stored snapshot was
-// stale) replaces the existing handler instead.
-func addInboundReconciling(api *xray.XrayAPI, inbound []byte) error {
-	err := api.AddInbound(inbound)
-	if err == nil || !xray.IsExistingTagErr(err) {
-		return err
-	}
-	var meta struct {
-		Tag string `json:"tag"`
-	}
-	if jsonErr := json.Unmarshal(inbound, &meta); jsonErr != nil || meta.Tag == "" {
-		return err
-	}
-	if delErr := api.DelInbound(meta.Tag); delErr != nil && !xray.IsMissingHandlerErr(delErr) {
-		return delErr
-	}
-	return api.AddInbound(inbound)
-}
-
-// addOutboundReconciling mirrors addInboundReconciling for outbounds.
-func addOutboundReconciling(api *xray.XrayAPI, outbound []byte) error {
-	err := api.AddOutbound(outbound)
-	if err == nil || !xray.IsExistingTagErr(err) {
-		return err
-	}
-	var meta struct {
-		Tag string `json:"tag"`
-	}
-	if jsonErr := json.Unmarshal(outbound, &meta); jsonErr != nil || meta.Tag == "" {
-		return err
-	}
-	if delErr := api.DelOutbound(meta.Tag); delErr != nil && !xray.IsMissingHandlerErr(delErr) {
-		return delErr
-	}
-	return api.AddOutbound(outbound)
 }
 
 // StopXray stops the running Xray process.

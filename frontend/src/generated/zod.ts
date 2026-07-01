@@ -464,6 +464,7 @@ export const NodeSchema = z.object({
   lastHeartbeat: z.number().int(),
   latencyMs: z.number().int(),
   memPct: z.number(),
+  mode: z.enum(['push', 'agent']),
   name: z.string(),
   netDown: z.number().int(),
   netUp: z.number().int(),

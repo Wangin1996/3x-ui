@@ -32,6 +32,7 @@ interface NodeFormModalProps {
   fetchInbounds: (payload: Partial<NodeRecord>) => Promise<Msg<RemoteInboundOption[]>>;
   save: (payload: Partial<NodeRecord>) => Promise<Msg<unknown>>;
   onOpenChange: (open: boolean) => void;
+  onAgentCreated?: (node: NodeRecord) => void;
 }
 
 function defaultValues(): NodeFormValues {
@@ -39,6 +40,7 @@ function defaultValues(): NodeFormValues {
     id: 0,
     name: '',
     remark: '',
+    mode: 'push',
     scheme: 'https',
     address: '',
     port: 2053,
@@ -63,6 +65,7 @@ export default function NodeFormModal({
   fetchInbounds,
   save,
   onOpenChange,
+  onAgentCreated,
 }: NodeFormModalProps) {
   const { t } = useTranslation();
   const [form] = Form.useForm<NodeFormValues>();
@@ -75,6 +78,7 @@ export default function NodeFormModal({
   const [inboundOptions, setInboundOptions] = useState<RemoteInboundOption[]>([]);
   const [testResult, setTestResult] = useState<ProbeResult | null>(null);
   const scheme = Form.useWatch('scheme', form) ?? 'https';
+  const nodeMode = Form.useWatch('mode', form) ?? 'push';
   const tlsVerifyMode = Form.useWatch('tlsVerifyMode', form) ?? 'verify';
   const inboundSyncMode = Form.useWatch('inboundSyncMode', form) ?? 'all';
   const { data: outboundGroups } = useOutboundTagGroups({ excludeBlackhole: true });
@@ -125,6 +129,7 @@ export default function NodeFormModal({
       id: values.id || 0,
       name: values.name.trim(),
       remark: values.remark?.trim() || '',
+      mode: values.mode,
       scheme: values.scheme,
       address: values.address.trim(),
       port: values.port,
@@ -211,16 +216,21 @@ export default function NodeFormModal({
     setSubmitting(true);
     try {
       const payload = buildPayload(result.data);
-      const test = await testConnection(payload);
-      const probe = test?.success ? test.obj : null;
-      if (!probe || probe.status !== 'online') {
-        setTestResult(probe ?? { status: 'offline', error: test?.msg || t('pages.nodes.connectionFailed') });
-        return;
+      if (payload.mode !== 'agent') {
+        const test = await testConnection(payload);
+        const probe = test?.success ? test.obj : null;
+        if (!probe || probe.status !== 'online') {
+          setTestResult(probe ?? { status: 'offline', error: test?.msg || t('pages.nodes.connectionFailed') });
+          return;
+        }
+        setTestResult(probe);
       }
-      setTestResult(probe);
       const msg = await save(payload);
       if (msg?.success) {
         onOpenChange(false);
+        if (payload.mode === 'agent' && msg.obj) {
+          onAgentCreated?.(msg.obj as NodeRecord);
+        }
       }
     } finally {
       setSubmitting(false);
@@ -268,6 +278,30 @@ export default function NodeFormModal({
             </Col>
           </Row>
 
+          <Form.Item
+            label={t('pages.nodes.mode')}
+            name="mode"
+            tooltip={t('pages.nodes.modeHint')}
+          >
+            <Select
+              disabled={mode === 'edit'}
+              options={[
+                { value: 'push', label: t('pages.nodes.modePush') },
+                { value: 'agent', label: t('pages.nodes.modeAgent') },
+              ]}
+            />
+          </Form.Item>
+
+          {nodeMode === 'agent' && (
+            <Alert
+              type="info"
+              showIcon
+              style={{ marginBottom: 16 }}
+              title={t('pages.nodes.agentModeHint')}
+              description={mode === 'edit' && node?.guid ? `X-Node-Guid: ${node.guid}` : undefined}
+            />
+          )}
+
           <Row gutter={16}>
             <Col xs={24} md={6}>
               <Form.Item label={t('pages.nodes.scheme')} name="scheme">
@@ -286,7 +320,7 @@ export default function NodeFormModal({
               <Form.Item
                 label={t('pages.nodes.address')}
                 name="address"
-                rules={[antdRule(NodeFormSchema.shape.address, t)]}
+                rules={nodeMode === 'agent' ? [] : [antdRule(NodeFormSchema.shape.address, t)]}
               >
                 <Input placeholder={t('pages.nodes.addressPlaceholder')} />
               </Form.Item>
@@ -295,7 +329,7 @@ export default function NodeFormModal({
               <Form.Item
                 label={t('pages.nodes.port')}
                 name="port"
-                rules={[antdRule(NodeFormSchema.shape.port, t)]}
+                rules={nodeMode === 'agent' ? [] : [antdRule(NodeFormSchema.shape.port, t)]}
               >
                 <InputNumber min={1} max={65535} style={{ width: '100%' }} />
               </Form.Item>

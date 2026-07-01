@@ -97,6 +97,8 @@ func TestAPIRoutesDocumented(t *testing.T) {
 			basePath = "/panel/api/nodes"
 		case "host.go":
 			basePath = "/panel/api/hosts"
+		case "agent.go":
+			basePath = "/panel/api/agent"
 		case "setting.go":
 			basePath = "/panel/api/setting"
 		case "xray_setting.go":
@@ -145,6 +147,11 @@ func TestAPIRoutesDocumented(t *testing.T) {
 		}
 		// Skip Chrome DevTools route
 		if strings.Contains(r.Path, ".well-known") {
+			continue
+		}
+		// Agent WebSocket upgrade is documented as a WS pseudo-route, which
+		// buildDocSet intentionally excludes from the REST doc set.
+		if r.Path == "/panel/api/agent/ws" {
 			continue
 		}
 

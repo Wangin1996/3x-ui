@@ -17,6 +17,7 @@ import { useNodeMutations } from '@/api/queries/useNodeMutations';
 import AppSidebar from '@/layouts/AppSidebar';
 import NodeList from './NodeList';
 import NodeFormModal from './NodeFormModal';
+import AgentInstallModal from './AgentInstallModal';
 import { setMessageInstance } from '@/utils/messageBus';
 import { HttpUtil } from '@/utils';
 import type { PanelUpdateInfo } from '../index/PanelUpdateModal';
@@ -71,6 +72,7 @@ export default function NodesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
   const [formNode, setFormNode] = useState<NodeRecord | null>(null);
+  const [installNode, setInstallNode] = useState<NodeRecord | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [mtlsOpen, setMtlsOpen] = useState(false);
   const [trustCa, setTrustCa] = useState('');
@@ -292,6 +294,7 @@ export default function NodesPage() {
                       onToggleEnable={onToggleEnable}
                       onUpdateNode={onUpdateNode}
                       onUpdateSelected={onUpdateSelected}
+                      onInstallCommand={setInstallNode}
                     />
                   </Col>
                 </Row>
@@ -309,6 +312,13 @@ export default function NodesPage() {
           fetchInbounds={fetchInbounds}
           save={onSave}
           onOpenChange={setFormOpen}
+          onAgentCreated={setInstallNode}
+        />
+
+        <AgentInstallModal
+          open={!!installNode}
+          node={installNode}
+          onClose={() => setInstallNode(null)}
         />
 
         <Modal
