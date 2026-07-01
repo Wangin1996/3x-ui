@@ -38,7 +38,7 @@ func TestJsonAndClashServeExternalLinkOnlySub(t *testing.T) {
 		t.Fatalf("GetJson missing external remark: %s", jsonOut)
 	}
 
-	clashOut, _, err := NewSubClashService(false, "", base).GetClash("ext-only", "sub.example.com")
+	clashOut, _, err := NewSubClashService(false, "", "", base).GetClash("ext-only", "sub.example.com")
 	if err != nil {
 		t.Fatalf("GetClash err = %v", err)
 	}

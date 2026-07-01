@@ -1432,6 +1432,8 @@
         "defaultIpLimit": "Default IP limit"
       },
       "subFormats": {
+        "clashTemplate": "Clash Template",
+        "clashTemplateDesc": "A full Clash config. Nodes are injected into `proxies`, and any `PROXIES` entry inside a proxy-group is replaced with all node names. Leave empty to use the built-in generated output.",
         "finalMask": "Final Mask",
         "finalMaskDesc": "xray finalmask masks (TCP/UDP) and QUIC tuning injected into every JSON subscription stream. Requires a recent xray client.",
         "packets": "Packets",

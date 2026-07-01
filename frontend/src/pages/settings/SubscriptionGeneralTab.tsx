@@ -1,5 +1,5 @@
 import { Input, InputNumber, Switch, Tabs } from 'antd';
-import { BranchesOutlined, CompassOutlined, IdcardOutlined, InfoCircleOutlined, NodeIndexOutlined, SafetyCertificateOutlined, SettingOutlined } from '@ant-design/icons';
+import { BranchesOutlined, CompassOutlined, IdcardOutlined, InfoCircleOutlined, NodeIndexOutlined, SettingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import type { AllSetting } from '@/models/setting';
 import { SettingListItem } from '@/components/ui';
@@ -32,16 +32,6 @@ export default function SubscriptionGeneralTab({ allSetting, updateSetting }: Su
             </SettingListItem>
             <SettingListItem paddings="small" title={t('pages.settings.subClashEnableTitle')}>
               <Switch checked={allSetting.subClashEnable} onChange={(v) => updateSetting({ subClashEnable: v })} />
-            </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.subListen')} description={t('pages.settings.subListenDesc')}>
-              <Input value={allSetting.subListen} onChange={(e) => updateSetting({ subListen: e.target.value })} />
-            </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.subDomain')} description={t('pages.settings.subDomainDesc')}>
-              <Input value={allSetting.subDomain} onChange={(e) => updateSetting({ subDomain: e.target.value })} />
-            </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.subPort')} description={t('pages.settings.subPortDesc')}>
-              <InputNumber value={allSetting.subPort} min={1} max={65535} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ subPort: Number(v) || 0 })} />
             </SettingListItem>
             <SettingListItem paddings="small" title={t('pages.settings.subPath')} description={t('pages.settings.subPathDesc')}>
               <Input
@@ -123,20 +113,6 @@ export default function SubscriptionGeneralTab({ allSetting, updateSetting }: Su
             >
               <Input value={allSetting.subThemeDir} placeholder="/etc/3x-ui/sub_templates/my-theme/"
                 onChange={(e) => updateSetting({ subThemeDir: e.target.value })} />
-            </SettingListItem>
-          </>
-        ),
-      },
-      {
-        key: '4',
-        label: catTabLabel(<SafetyCertificateOutlined />, t('pages.settings.certs'), isMobile),
-        children: (
-          <>
-            <SettingListItem paddings="small" title={t('pages.settings.subCertPath')} description={t('pages.settings.subCertPathDesc')}>
-              <Input value={allSetting.subCertFile} onChange={(e) => updateSetting({ subCertFile: e.target.value })} />
-            </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.subKeyPath')} description={t('pages.settings.subKeyPathDesc')}>
-              <Input value={allSetting.subKeyFile} onChange={(e) => updateSetting({ subKeyFile: e.target.value })} />
             </SettingListItem>
           </>
         ),

@@ -20,6 +20,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/mtproto"
+	"github.com/mhsanaei/3x-ui/v3/internal/sub"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/sys"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/controller"
@@ -267,6 +268,13 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 		c.JSON(http.StatusOK, gin.H{})
 	})
 
+	// Serve the subscription off the panel engine at the site root (no separate
+	// port). Delegated by path prefix to a self-contained sub engine, so its
+	// base_path/assets never collide with the panel's.
+	if err := sub.RegisterOnPanel(engine, &s.settingService); err != nil {
+		return nil, err
+	}
+
 	// Let unknown panel document routes fall back to the SPA shell, while every
 	// non-SPA miss still returns a hard 404.
 	engine.NoRoute(func(c *gin.Context) {
@@ -370,7 +378,7 @@ func (s *Server) startTask(restartXray bool) {
 
 	// Telegram-bot–dependent jobs: periodic stats report + callback-hash cleanup.
 	isTgbotenabled, err := s.settingService.GetTgbotEnabled()
-	if (err == nil) && (isTgbotenabled) {
+	if (err == nil) && isTgbotenabled {
 		runtime, err := s.settingService.GetTgbotRuntime()
 		if err != nil {
 			logger.Warningf("Add NewStatsNotifyJob: failed to load runtime: %v; using default @daily", err)
@@ -650,7 +658,7 @@ func (s *Server) start(restartXray bool, startTgBot bool) (err error) {
 
 	if startTgBot {
 		isTgbotenabled, err := s.settingService.GetTgbotEnabled()
-		if (err == nil) && (isTgbotenabled) {
+		if (err == nil) && isTgbotenabled {
 			tgBot := s.tgbotService.NewTgbot()
 			_ = tgBot.Start(i18nFS)
 			// Subscribe Telegram notifications for event bus

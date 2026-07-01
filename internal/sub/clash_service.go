@@ -9,16 +9,22 @@ import (
 	yaml "github.com/goccy/go-yaml"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 )
+
+// clashProxiesMarker is the token an admin puts inside a proxy-group's proxies
+// list in the Clash template; it is replaced with every generated node name.
+const clashProxiesMarker = "PROXIES"
 
 type SubClashService struct {
 	enableRouting bool
 	clashRules    string
+	clashTemplate string
 	SubService    *SubService
 }
 
-func NewSubClashService(enableRouting bool, clashRules string, subService *SubService) *SubClashService {
-	return &SubClashService{enableRouting: enableRouting, clashRules: clashRules, SubService: subService}
+func NewSubClashService(enableRouting bool, clashRules string, clashTemplate string, subService *SubService) *SubClashService {
+	return &SubClashService{enableRouting: enableRouting, clashRules: clashRules, clashTemplate: clashTemplate, SubService: subService}
 }
 
 func (s *SubClashService) GetClash(subId string, host string) (string, string, error) {
@@ -78,13 +84,24 @@ func (s *SubClashService) GetClash(subId string, host string) (string, string, e
 	}
 	traffic, _ := subReq.AggregateTrafficByEmails(emails)
 
-	proxyNames := make([]string, 0, len(proxies)+1)
+	nodeNames := make([]string, 0, len(proxies))
 	for _, proxy := range proxies {
 		if name, ok := proxy["name"].(string); ok && name != "" {
-			proxyNames = append(proxyNames, name)
+			nodeNames = append(nodeNames, name)
 		}
 	}
-	proxyNames = append(proxyNames, "DIRECT")
+
+	header := fmt.Sprintf("upload=%d; download=%d; total=%d; expire=%d", traffic.Up, traffic.Down, traffic.Total, traffic.ExpiryTime/1000)
+
+	if strings.TrimSpace(s.clashTemplate) != "" {
+		if rendered, terr := renderClashTemplate(s.clashTemplate, proxies, nodeNames); terr != nil {
+			logger.Warning("sub clash: template render failed, using generated config:", terr)
+		} else {
+			return rendered, header, nil
+		}
+	}
+
+	proxyNames := append(append([]string{}, nodeNames...), "DIRECT")
 
 	config := map[string]any{
 		"proxies": proxies,
@@ -107,8 +124,60 @@ func (s *SubClashService) GetClash(subId string, host string) (string, string, e
 		return "", "", err
 	}
 
-	header := fmt.Sprintf("upload=%d; download=%d; total=%d; expire=%d", traffic.Up, traffic.Down, traffic.Total, traffic.ExpiryTime/1000)
 	return string(finalYAML), header, nil
+}
+
+// renderClashTemplate injects the generated proxies and node names into an admin
+// Clash template. Top-level `proxies` gets the nodes merged in; inside every
+// proxy-group, any entry equal to clashProxiesMarker is replaced by all node
+// names. The rest of the template (dns, rules, group structure) is preserved.
+func renderClashTemplate(tmpl string, proxies []map[string]any, names []string) (string, error) {
+	var cfg map[string]any
+	if err := yaml.Unmarshal([]byte(tmpl), &cfg); err != nil {
+		return "", err
+	}
+	if cfg == nil {
+		cfg = map[string]any{}
+	}
+
+	merged := make([]any, 0, len(proxies))
+	if existing, ok := cfg["proxies"].([]any); ok {
+		merged = append(merged, existing...)
+	}
+	for _, p := range proxies {
+		merged = append(merged, p)
+	}
+	cfg["proxies"] = merged
+
+	if groups, ok := cfg["proxy-groups"].([]any); ok {
+		for _, g := range groups {
+			group, ok := g.(map[string]any)
+			if !ok {
+				continue
+			}
+			list, ok := group["proxies"].([]any)
+			if !ok {
+				continue
+			}
+			expanded := make([]any, 0, len(list)+len(names))
+			for _, item := range list {
+				if str, ok := item.(string); ok && str == clashProxiesMarker {
+					for _, n := range names {
+						expanded = append(expanded, n)
+					}
+					continue
+				}
+				expanded = append(expanded, item)
+			}
+			group["proxies"] = expanded
+		}
+	}
+
+	out, err := yaml.Marshal(cfg)
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
 }
 
 // ensureUniqueProxyNames keeps every proxy "name" non-empty and unique:

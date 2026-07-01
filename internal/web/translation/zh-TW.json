@@ -1314,6 +1314,8 @@
         "defaultIpLimit": "預設 IP 限制"
       },
       "subFormats": {
+        "clashTemplate": "Clash 範本",
+        "clashTemplateDesc": "一份完整的 Clash 設定。節點會自動注入到 proxies,proxy-group 裡值為 PROXIES 的項會被替換為所有節點名。留空則使用內建產生的輸出。",
         "finalMask": "Final Mask",
         "finalMaskDesc": "注入到每個 JSON 訂閱串流的 xray finalmask 遮罩（TCP/UDP）與 QUIC 調校。需要較新的 xray 用戶端。",
         "packets": "封包",

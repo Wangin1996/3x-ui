@@ -260,7 +260,7 @@ func TestSub_HostAllowInsecure(t *testing.T) {
 		t.Fatalf("raw link should carry allowInsecure=1: %s", strings.Join(links, "\n"))
 	}
 
-	clash := NewSubClashService(false, "", NewSubService(""))
+	clash := NewSubClashService(false, "", "", NewSubService(""))
 	yaml, _, err := clash.GetClash("s1", "req.example.com")
 	if err != nil {
 		t.Fatalf("GetClash: %v", err)
@@ -353,7 +353,7 @@ func TestSub_ExcludeFromSubTypes(t *testing.T) {
 		t.Fatalf("host not excluded from raw should appear in GetSubs")
 	}
 
-	clash := NewSubClashService(false, "", NewSubService(""))
+	clash := NewSubClashService(false, "", "", NewSubService(""))
 	yaml, _, err := clash.GetClash("s1", "req.example.com")
 	if err != nil {
 		t.Fatalf("GetClash: %v", err)

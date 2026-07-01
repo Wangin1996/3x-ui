@@ -71,23 +71,17 @@ func runWebServer() {
 		log.Fatalf("Error initializing database: %v", err)
 	}
 
+	// The subscription rides the panel engine (no separate port), so its
+	// dependencies must be ready before the panel starts and builds its routes.
+	sub.SetDistFS(web.EmbeddedDist())
+	service.RegisterSubLinkProvider(sub.NewLinkProvider())
+
 	var server *web.Server
 	server = web.NewServer()
 	global.SetWebServer(server)
 	err = server.Start()
 	if err != nil {
 		log.Fatalf("Error starting web server: %v", err)
-		return
-	}
-
-	var subServer *sub.Server
-	sub.SetDistFS(web.EmbeddedDist())
-	service.RegisterSubLinkProvider(sub.NewLinkProvider())
-	subServer = sub.NewServer()
-	global.SetSubServer(subServer)
-	err = subServer.Start()
-	if err != nil {
-		log.Fatalf("Error starting sub server: %v", err)
 		return
 	}
 
@@ -132,10 +126,6 @@ func runWebServer() {
 			if err != nil {
 				logger.Debug("Error stopping web server:", err)
 			}
-			err = subServer.Stop()
-			if err != nil {
-				logger.Debug("Error stopping sub server:", err)
-			}
 
 			server = web.NewServer()
 			global.SetWebServer(server)
@@ -145,16 +135,6 @@ func runWebServer() {
 				return
 			}
 			log.Println("Web server restarted successfully.")
-
-			sub.SetDistFS(web.EmbeddedDist())
-			subServer = sub.NewServer()
-			global.SetSubServer(subServer)
-			err = subServer.Start()
-			if err != nil {
-				log.Fatalf("Error restarting sub server: %v", err)
-				return
-			}
-			log.Println("Sub server restarted successfully.")
 		case sys.SIGUSR1:
 			logger.Info("Received USR1 signal, restarting xray-core...")
 			err := server.RestartXray()
@@ -172,7 +152,6 @@ func runWebServer() {
 			// ------------------------------------------------------------
 
 			_ = server.Stop()
-			_ = subServer.Stop()
 			log.Println("Shutting down servers.")
 			return
 		}

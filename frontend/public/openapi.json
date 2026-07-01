@@ -211,6 +211,10 @@
             "description": "Clash/Mihomo global routing rules",
             "type": "string"
           },
+          "subClashTemplate": {
+            "description": "Full Clash template; nodes injected into it when set",
+            "type": "string"
+          },
           "subClashURI": {
             "description": "Clash/Mihomo subscription server URI",
             "type": "string"
@@ -463,6 +467,7 @@
           "subClashEnableRouting",
           "subClashPath",
           "subClashRules",
+          "subClashTemplate",
           "subClashURI",
           "subDomain",
           "subEnable",
@@ -718,6 +723,10 @@
           },
           "subClashRules": {
             "description": "Clash/Mihomo global routing rules",
+            "type": "string"
+          },
+          "subClashTemplate": {
+            "description": "Full Clash template; nodes injected into it when set",
             "type": "string"
           },
           "subClashURI": {
@@ -979,6 +988,7 @@
           "subClashEnableRouting",
           "subClashPath",
           "subClashRules",
+          "subClashTemplate",
           "subClashURI",
           "subDomain",
           "subEnable",

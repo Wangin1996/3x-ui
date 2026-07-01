@@ -98,6 +98,7 @@ var defaultValueMap = map[string]string{
 	"subClashURI":                 "",
 	"subClashEnableRouting":       "false",
 	"subClashRules":               "",
+	"subClashTemplate":            "",
 	"subJsonMux":                  "",
 	"subJsonRules":                "",
 	"subJsonFinalMask":            "",
@@ -817,6 +818,10 @@ func (s *SettingService) GetSubClashRules() (string, error) {
 	return s.getString("subClashRules")
 }
 
+func (s *SettingService) GetSubClashTemplate() (string, error) {
+	return s.getString("subClashTemplate")
+}
+
 func (s *SettingService) GetSubJsonMux() (string, error) {
 	return s.getString("subJsonMux")
 }
@@ -1223,23 +1228,27 @@ func extractHostname(host string) string {
 // BuildSubURIBase is shared by GetDefaultSettings (the panel's Client
 // Information page) and the subscription page so both render subscription
 // URLs identically.
+// BuildSubURIBase returns the scheme://host[:port] base for subscription URLs.
+// The subscription is served by the panel itself (no separate port), so the base
+// derives from the panel's own port, domain and TLS. A configured subURI still
+// overrides this in buildSingleURL for reverse-proxy setups.
 func (s *SettingService) BuildSubURIBase(host string) string {
-	subPort, _ := s.GetSubPort()
-	subDomain, _ := s.GetSubDomain()
-	subKeyFile, _ := s.GetSubKeyFile()
-	subCertFile, _ := s.GetSubCertFile()
-	subTLS := subKeyFile != "" && subCertFile != ""
-	if subDomain == "" {
-		subDomain = extractHostname(host)
+	port, _ := s.GetPort()
+	domain, _ := s.GetWebDomain()
+	keyFile, _ := s.GetKeyFile()
+	certFile, _ := s.GetCertFile()
+	tls := keyFile != "" && certFile != ""
+	if domain == "" {
+		domain = extractHostname(host)
 	}
 	scheme := "http"
-	if subTLS {
+	if tls {
 		scheme = "https"
 	}
-	if (subPort == 443 && subTLS) || (subPort == 80 && !subTLS) {
-		return scheme + "://" + subDomain
+	if (port == 443 && tls) || (port == 80 && !tls) {
+		return scheme + "://" + domain
 	}
-	return fmt.Sprintf("%s://%s:%d", scheme, subDomain, subPort)
+	return fmt.Sprintf("%s://%s:%d", scheme, domain, port)
 }
 
 func (s *SettingService) GetDefaultSettings(host string) (any, error) {

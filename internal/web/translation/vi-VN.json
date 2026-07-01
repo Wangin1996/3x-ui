@@ -1314,6 +1314,8 @@
         "defaultIpLimit": "Giới hạn IP mặc định"
       },
       "subFormats": {
+        "clashTemplate": "Clash Template",
+        "clashTemplateDesc": "A full Clash config. Nodes are injected into `proxies`, and any `PROXIES` entry inside a proxy-group is replaced with all node names. Leave empty to use the built-in generated output.",
         "finalMask": "Final Mask",
         "finalMaskDesc": "Mask finalmask của xray (TCP/UDP) và tinh chỉnh QUIC được thêm vào mọi luồng đăng ký JSON. Yêu cầu client xray mới hơn.",
         "packets": "Gói",

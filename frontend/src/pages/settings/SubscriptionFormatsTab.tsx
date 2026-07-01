@@ -26,6 +26,19 @@ interface SubscriptionFormatsTabProps {
   updateSetting: (patch: Partial<AllSetting>) => void;
 }
 
+const CLASH_TEMPLATE_PLACEHOLDER = [
+  'mixed-port: 7890',
+  'mode: rule',
+  'proxies: []',
+  'proxy-groups:',
+  '  - name: PROXY',
+  '    type: select',
+  '    proxies:',
+  '      - PROXIES',
+  'rules:',
+  '  - MATCH,PROXY',
+].join('\n');
+
 const DEFAULT_MUX = {
   enabled: true,
   concurrency: 8,
@@ -264,6 +277,23 @@ export default function SubscriptionFormatsTab({ allSetting, updateSetting }: Su
                 </SettingListItem>
               </div>
             )}
+          </>
+        ),
+      },
+      {
+        key: '5',
+        label: catTabLabel(<RocketOutlined />, t('pages.settings.subFormats.clashTemplate'), isMobile),
+        children: (
+          <>
+            <SettingListItem paddings="small" title={t('pages.settings.subFormats.clashTemplate')} description={t('pages.settings.subFormats.clashTemplateDesc')} />
+            <Input.TextArea
+              value={allSetting.subClashTemplate}
+              onChange={(e) => updateSetting({ subClashTemplate: e.target.value })}
+              autoSize={{ minRows: 12, maxRows: 34 }}
+              spellCheck={false}
+              placeholder={CLASH_TEMPLATE_PLACEHOLDER}
+              style={{ fontFamily: 'monospace' }}
+            />
           </>
         ),
       },

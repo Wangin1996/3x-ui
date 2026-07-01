@@ -185,6 +185,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "Clash/Mihomo global routing rules",
         "type": "string"
       },
+      "subClashTemplate": {
+        "description": "Full Clash template; nodes injected into it when set",
+        "type": "string"
+      },
       "subClashURI": {
         "description": "Clash/Mihomo subscription server URI",
         "type": "string"
@@ -437,6 +441,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subClashEnableRouting",
       "subClashPath",
       "subClashRules",
+      "subClashTemplate",
       "subClashURI",
       "subDomain",
       "subEnable",
@@ -692,6 +697,10 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "subClashRules": {
         "description": "Clash/Mihomo global routing rules",
+        "type": "string"
+      },
+      "subClashTemplate": {
+        "description": "Full Clash template; nodes injected into it when set",
         "type": "string"
       },
       "subClashURI": {
@@ -953,6 +962,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subClashEnableRouting",
       "subClashPath",
       "subClashRules",
+      "subClashTemplate",
       "subClashURI",
       "subDomain",
       "subEnable",
