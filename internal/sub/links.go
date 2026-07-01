@@ -41,6 +41,14 @@ func (p *LinkProvider) LinksForClient(host string, inbound *model.Inbound, email
 	return splitLinkLines(svc.GetLink(inbound, email))
 }
 
+func (p *LinkProvider) SubURLsForSubId(host, subId string) (string, string, string) {
+	svc := p.build(host)
+	subPath, _ := p.settingService.GetSubPath()
+	subJsonPath, _ := p.settingService.GetSubJsonPath()
+	subClashPath, _ := p.settingService.GetSubClashPath()
+	return svc.BuildURLs(subPath, subJsonPath, subClashPath, subId)
+}
+
 func (p *LinkProvider) LinksForInbounds(host string, inbounds []*model.Inbound) []string {
 	svc := p.build(host)
 	var out []string

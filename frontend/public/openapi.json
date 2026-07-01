@@ -2411,6 +2411,10 @@
     {
       "name": "WebSocket",
       "description": "Real-time status updates via WebSocket. Connect once at <code>ws://<panel>/ws</code> to receive a stream of JSON messages without polling. Requires an authenticated session cookie (Bearer token auth is not supported). Each message has a <code>type</code> field that identifies the payload shape."
+    },
+    {
+      "name": "User Portal",
+      "description": "End-user self-service surface, separate from the admin API. Proxy clients log in with their email and a portal password (set by an admin via /panel/api/clients/setLoginPassword/:email) and receive a session under a key distinct from the admin session, so a client session can never reach /panel. All read-only except the subscription-token rotation."
     }
   ],
   "paths": {
@@ -6794,6 +6798,60 @@
         }
       }
     },
+    "/panel/api/clients/setLoginPassword/{email}": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Set (or clear, by sending an empty password) the end-user portal login password for this client. Stored as a bcrypt hash in a column separate from the protocol credentials. An empty value disables portal login for the client.",
+        "operationId": "post_panel_api_clients_setLoginPassword_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "password": "s3cret"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/clients/ips/{email}": {
       "post": {
         "tags": [
@@ -10286,6 +10344,203 @@
                 "example": {
                   "type": "invalidate",
                   "resource": "inbounds"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "tags": [
+          "User Portal"
+        ],
+        "summary": "Authenticate an end-user client with email + portal password and receive a session cookie. Rate-limited independently of admin logins.",
+        "operationId": "post_user_login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Client email."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Portal password set by an admin."
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              },
+              "example": {
+                "email": "user@example.com",
+                "password": "s3cret"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "success": false,
+                  "msg": "Wrong email or password"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/logout": {
+      "post": {
+        "tags": [
+          "User Portal"
+        ],
+        "summary": "Clear the end-user session cookie, leaving any admin session on the same cookie intact.",
+        "operationId": "post_user_logout",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/api/me": {
+      "get": {
+        "tags": [
+          "User Portal"
+        ],
+        "summary": "Read-only self-service view for the logged-in client: usage (up/down/total), expiry, enable state, last-online, subscription id + URLs, per-node share links, external links, and observed source IPs.",
+        "operationId": "get_user_api_me",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "email": "user@example.com",
+                    "enable": true,
+                    "up": 1048576,
+                    "down": 2097152,
+                    "total": 10737418240,
+                    "expiryTime": 1735689600000,
+                    "subId": "i7tvdpeffi0hvvf1",
+                    "subUrl": "https://example.com:2096/sub/i7tvdpeffi0hvvf1",
+                    "links": []
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/api/rotateSub": {
+      "post": {
+        "tags": [
+          "User Portal"
+        ],
+        "summary": "Rotate the logged-in client’s subscription id. Updates the clients table and every attached inbound’s settings, so old subscription URLs stop resolving. Returns the refreshed self-service view.",
+        "operationId": "post_user_api_rotateSub",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "subId": "9a1c…",
+                    "subUrl": "https://example.com:2096/sub/9a1c…"
+                  }
                 }
               }
             }

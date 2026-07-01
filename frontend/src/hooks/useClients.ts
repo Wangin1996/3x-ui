@@ -409,6 +409,11 @@ export function useClients() {
     onSuccess: (msg) => { if (msg?.success) invalidateAll(); },
   });
 
+  const setLoginPasswordMut = useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      HttpUtil.post(`/panel/api/clients/setLoginPassword/${encodeURIComponent(email)}`, { password }, JSON_HEADERS),
+  });
+
   const delDepletedMut = useMutation({
     mutationFn: async () => {
       const raw = await HttpUtil.post('/panel/api/clients/delDepleted');
@@ -497,6 +502,8 @@ export function useClients() {
     return resetTrafficMut.mutateAsync(client.email);
   }, [resetTrafficMut]);
   const resetAllTraffics = useCallback(() => resetAllTrafficsMut.mutateAsync(), [resetAllTrafficsMut]);
+  const setLoginPassword = useCallback((email: string, password: string) =>
+    setLoginPasswordMut.mutateAsync({ email, password }), [setLoginPasswordMut]);
   const delDepleted = useCallback(() => delDepletedMut.mutateAsync(), [delDepletedMut]);
   const delOrphans = useCallback(() => delOrphansMut.mutateAsync(), [delOrphansMut]);
   const importClients = useCallback((data: string) => importClientsMut.mutateAsync(data), [importClientsMut]);
@@ -623,6 +630,7 @@ export function useClients() {
     detach,
     bulkDetach,
     resetTraffic,
+    setLoginPassword,
     resetAllTraffics,
     delDepleted,
     delOrphans,

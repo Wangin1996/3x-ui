@@ -126,6 +126,34 @@
     "openMenu": "打开菜单"
   },
   "pages": {
+    "user": {
+      "loginTitle": "用户中心",
+      "email": "邮箱",
+      "logout": "退出登录",
+      "usage": "流量",
+      "unlimited": "不限量",
+      "expiry": "到期时间",
+      "never": "永不",
+      "lastOnline": "最后在线",
+      "subscription": "订阅",
+      "subUrl": "订阅链接",
+      "links": "配置链接",
+      "onlineIps": "近期 IP",
+      "rotate": "重置链接",
+      "rotateHint": "重置会生成新的订阅链接,旧链接将失效 —— 重置后请在所有客户端更新。",
+      "status": {
+        "active": "正常",
+        "disabled": "已停用",
+        "expired": "已到期"
+      },
+      "toasts": {
+        "fillRequired": "此项必填",
+        "wrongCredentials": "邮箱或密码错误",
+        "rotated": "订阅链接已重置",
+        "rotateFailed": "重置失败",
+        "copyFailed": "复制失败"
+      }
+    },
     "login": {
       "hello": "你好",
       "title": "欢迎",
@@ -721,6 +749,13 @@
       "sniffingDestOverride": "目标覆盖"
     },
     "clients": {
+      "portalPassword": {
+        "button": "登录密码",
+        "title": "设置用户中心登录密码",
+        "hint": "用户用邮箱和此密码登录「用户中心」。留空则停用该用户的门户登录。",
+        "placeholder": "新密码(留空=停用)",
+        "saved": "登录密码已更新"
+      },
       "tabBasics": "基本",
       "tabCredentials": "凭据",
       "tabLinks": "链接",

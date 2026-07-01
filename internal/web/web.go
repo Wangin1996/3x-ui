@@ -112,10 +112,11 @@ type Server struct {
 	httpServer *http.Server
 	listener   net.Listener
 
-	index *controller.IndexController
-	panel *controller.XUIController
-	api   *controller.APIController
-	ws    *controller.WebSocketController
+	index      *controller.IndexController
+	panel      *controller.XUIController
+	api        *controller.APIController
+	userPortal *controller.UserPortalController
+	ws         *controller.WebSocketController
 
 	xrayService    service.XrayService
 	settingService service.SettingService
@@ -249,6 +250,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	s.panel = controller.NewXUIController(g)
 	g.GET("/panel/api/openapi.json", controller.ServeOpenAPISpec)
 	s.api = controller.NewAPIController(g)
+	s.userPortal = controller.NewUserPortalController(g)
 
 	// Initialize WebSocket hub
 	s.wsHub = websocket.NewHub()

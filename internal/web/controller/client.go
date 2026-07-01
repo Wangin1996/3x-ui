@@ -73,6 +73,7 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.POST("/bulkResetTraffic", a.bulkResetTraffic)
 	g.POST("/resetTraffic/:email", a.resetTrafficByEmail)
 	g.POST("/updateTraffic/:email", a.updateTrafficByEmail)
+	g.POST("/setLoginPassword/:email", a.setLoginPassword)
 	g.POST("/ips/:email", a.getIps)
 	g.POST("/clearIps/:email", a.clearIps)
 	g.POST("/onlines", a.onlines)
@@ -522,6 +523,22 @@ func (a *ClientController) activeInbounds(c *gin.Context) {
 func (a *ClientController) lastOnline(c *gin.Context) {
 	data, err := a.inboundService.GetClientsLastOnline()
 	jsonObj(c, data, err)
+}
+
+func (a *ClientController) setLoginPassword(c *gin.Context) {
+	email := c.Param("email")
+	var body struct {
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if err := a.clientService.SetLoginPassword(email, body.Password); err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.updateSuccess"), err)
+		return
+	}
+	jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.updateSuccess"), nil)
 }
 
 func (a *ClientController) getTrafficByEmail(c *gin.Context) {

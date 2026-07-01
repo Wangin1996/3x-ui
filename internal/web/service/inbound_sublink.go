@@ -9,6 +9,7 @@ type SubLinkProvider interface {
 	SubLinksForSubId(host, subId string) ([]string, error)
 	LinksForClient(host string, inbound *model.Inbound, email string) []string
 	LinksForInbounds(host string, inbounds []*model.Inbound) []string
+	SubURLsForSubId(host, subId string) (sub, json, clash string)
 }
 
 var registeredSubLinkProvider SubLinkProvider
@@ -22,6 +23,17 @@ func (s *InboundService) GetSubLinks(host, subId string) ([]string, error) {
 		return nil, common.NewError("sub link provider not registered")
 	}
 	return registeredSubLinkProvider.SubLinksForSubId(host, subId)
+}
+
+// GetSubURLs returns the aggregated subscription URLs (raw / JSON / Clash) for a
+// subId, honouring the sub-server's own listen port and any configured subURI —
+// which the panel origin cannot infer on its own.
+func (s *InboundService) GetSubURLs(host, subId string) (sub, json, clash string, err error) {
+	if registeredSubLinkProvider == nil {
+		return "", "", "", common.NewError("sub link provider not registered")
+	}
+	sub, json, clash = registeredSubLinkProvider.SubURLsForSubId(host, subId)
+	return sub, json, clash, nil
 }
 
 func (s *InboundService) GetAllInboundLinks(host string, userId int) ([]string, error) {

@@ -19,7 +19,7 @@ import {
   Typography,
   message,
 } from 'antd';
-import { DeleteOutlined, EyeOutlined, PlusOutlined, ReloadOutlined, RetweetOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeOutlined, KeyOutlined, PlusOutlined, ReloadOutlined, RetweetOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { HttpUtil, RandomUtil, Wireguard } from '@/utils';
@@ -89,6 +89,7 @@ interface ClientFormModalProps {
     meta: SaveMetaEdit | SaveMetaCreate,
   ) => Promise<ApiMsg | null>;
   resetTraffic?: (client: ClientRecord) => Promise<ApiMsg | null>;
+  setLoginPassword?: (email: string, password: string) => Promise<ApiMsg | null>;
   onOpenChange: (open: boolean) => void;
 }
 
@@ -178,6 +179,7 @@ export default function ClientFormModal({
   groups = [],
   save,
   resetTraffic,
+  setLoginPassword,
   onOpenChange,
 }: ClientFormModalProps) {
   const { t } = useTranslation();
@@ -187,6 +189,9 @@ export default function ClientFormModal({
   const [form, setForm] = useState<FormState>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pwValue, setPwValue] = useState('');
+  const [pwSubmitting, setPwSubmitting] = useState(false);
   const [clientIps, setClientIps] = useState<ClientIpInfo[]>([]);
   const [ipsLoading, setIpsLoading] = useState(false);
   const [ipsClearing, setIpsClearing] = useState(false);
@@ -434,6 +439,23 @@ export default function ClientFormModal({
     }
   }
 
+  async function onSetLoginPassword() {
+    if (!isEdit || !client?.email || !setLoginPassword) return;
+    setPwSubmitting(true);
+    try {
+      const msg = await setLoginPassword(client.email, pwValue);
+      if (msg?.success) {
+        messageApi.success(t('pages.clients.portalPassword.saved'));
+        setPwOpen(false);
+        setPwValue('');
+      } else {
+        messageApi.error(msg?.msg || t('somethingWentWrong'));
+      }
+    } finally {
+      setPwSubmitting(false);
+    }
+  }
+
   async function onSubmit() {
     const schema = isEdit ? ClientFormSchema : ClientCreateFormSchema;
     const validated = schema.safeParse({
@@ -552,6 +574,11 @@ export default function ClientFormModal({
                   {t('pages.inbounds.resetTraffic')}
                 </Button>
               </Popconfirm>
+            )}
+            {isEdit && setLoginPassword && (
+              <Button icon={<KeyOutlined />} onClick={() => { setPwValue(''); setPwOpen(true); }}>
+                {t('pages.clients.portalPassword.button')}
+              </Button>
             )}
             <div style={{ marginInlineStart: 'auto', display: 'flex', gap: 8 }}>
               <Button onClick={close}>{t('cancel')}</Button>
@@ -913,6 +940,27 @@ export default function ClientFormModal({
         ) : (
           <Tag>{t('tgbot.noIpRecord')}</Tag>
         )}
+      </Modal>
+
+      <Modal
+        open={pwOpen}
+        title={t('pages.clients.portalPassword.title')}
+        okText={t('save')}
+        cancelText={t('cancel')}
+        confirmLoading={pwSubmitting}
+        zIndex={CLIENT_IP_LOG_MODAL_Z_INDEX}
+        onOk={onSetLoginPassword}
+        onCancel={() => setPwOpen(false)}
+      >
+        <Typography.Paragraph type="secondary">
+          {t('pages.clients.portalPassword.hint')}
+        </Typography.Paragraph>
+        <Input.Password
+          value={pwValue}
+          onChange={(e) => setPwValue(e.target.value)}
+          placeholder={t('pages.clients.portalPassword.placeholder')}
+          autoComplete="new-password"
+        />
       </Modal>
     </>
   );

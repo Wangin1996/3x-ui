@@ -208,7 +208,7 @@ export default function ClientsPage() {
     inbounds, onlines, loading, transitioning, fetched, fetchError, subSettings,
     tgBotEnable, expireDiff, trafficDiff, pageSize,
     create, update, remove, bulkDelete, bulkAdjust, bulkEnable, bulkDisable, bulkAddToGroup, bulkRemoveFromGroup, attach, setExternalLinks, bulkAttach, detach, bulkDetach,
-    resetTraffic, resetAllTraffics, delDepleted, delOrphans, exportClients, importClients, setEnable,
+    resetTraffic, resetAllTraffics, delDepleted, delOrphans, exportClients, importClients, setEnable, setLoginPassword,
     applyTrafficEvent, applyClientStatsEvent,
     refresh,
     hydrate,
@@ -1454,6 +1454,7 @@ export default function ClientsPage() {
             groups={allGroups}
             save={onSave}
             resetTraffic={resetTraffic}
+            setLoginPassword={setLoginPassword}
             onOpenChange={setFormOpen}
           />
         </LazyMount>

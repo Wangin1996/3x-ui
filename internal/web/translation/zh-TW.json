@@ -126,6 +126,34 @@
     "openMenu": "開啟選單"
   },
   "pages": {
+    "user": {
+      "loginTitle": "使用者中心",
+      "email": "信箱",
+      "logout": "登出",
+      "usage": "流量",
+      "unlimited": "不限量",
+      "expiry": "到期時間",
+      "never": "永不",
+      "lastOnline": "最後上線",
+      "subscription": "訂閱",
+      "subUrl": "訂閱連結",
+      "links": "設定連結",
+      "onlineIps": "近期 IP",
+      "rotate": "重置連結",
+      "rotateHint": "重置會產生新的訂閱連結,舊連結將失效 —— 重置後請在所有用戶端更新。",
+      "status": {
+        "active": "正常",
+        "disabled": "已停用",
+        "expired": "已到期"
+      },
+      "toasts": {
+        "fillRequired": "此項必填",
+        "wrongCredentials": "信箱或密碼錯誤",
+        "rotated": "訂閱連結已重置",
+        "rotateFailed": "重置失敗",
+        "copyFailed": "複製失敗"
+      }
+    },
     "login": {
       "hello": "你好",
       "title": "歡迎",
@@ -721,6 +749,13 @@
       "sniffingDestOverride": "目標覆寫"
     },
     "clients": {
+      "portalPassword": {
+        "button": "登入密碼",
+        "title": "設定使用者中心登入密碼",
+        "hint": "使用者用信箱和此密碼登入「使用者中心」。留空則停用該使用者的門戶登入。",
+        "placeholder": "新密碼(留空=停用)",
+        "saved": "登入密碼已更新"
+      },
       "tabBasics": "基本",
       "tabCredentials": "認證資訊",
       "tabLinks": "連結",

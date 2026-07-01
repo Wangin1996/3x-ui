@@ -804,6 +804,15 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/clients/setLoginPassword/:email',
+        summary: 'Set (or clear, by sending an empty password) the end-user portal login password for this client. Stored as a bcrypt hash in a column separate from the protocol credentials. An empty value disables portal login for the client.',
+        params: [
+          { name: 'email', in: 'path', type: 'string', desc: 'Client email.' },
+        ],
+        body: '{\n  "password": "s3cret"\n}',
+      },
+      {
+        method: 'POST',
         path: '/panel/api/clients/ips/:email',
         summary: 'List source IPs that have connected with the given client’s credentials. Returns an array of "ip (timestamp)" strings.',
         params: [
@@ -1482,6 +1491,44 @@ export const sections: readonly Section[] = [
         path: '→ type: invalidate',
         summary: 'Instructs the UI to re-fetch a resource. Fired when another admin session modifies data (e.g. toggling inbound enable).',
         response: '{\n  "type": "invalidate",\n  "resource": "inbounds"\n}',
+      },
+    ],
+  },
+  {
+    id: 'user-portal',
+    title: 'User Portal',
+    description:
+      'End-user self-service surface, separate from the admin API. Proxy clients log in with their email and a portal password (set by an admin via /panel/api/clients/setLoginPassword/:email) and receive a session under a key distinct from the admin session, so a client session can never reach /panel. All read-only except the subscription-token rotation.',
+    endpoints: [
+      {
+        method: 'POST',
+        path: '/user/login',
+        summary: 'Authenticate an end-user client with email + portal password and receive a session cookie. Rate-limited independently of admin logins.',
+        params: [
+          { name: 'email', in: 'body', type: 'string', desc: 'Client email.' },
+          { name: 'password', in: 'body', type: 'string', desc: 'Portal password set by an admin.' },
+        ],
+        body: '{\n  "email": "user@example.com",\n  "password": "s3cret"\n}',
+        response: '{\n  "success": true\n}',
+        errorResponse: '{\n  "success": false,\n  "msg": "Wrong email or password"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/user/logout',
+        summary: 'Clear the end-user session cookie, leaving any admin session on the same cookie intact.',
+        response: '{\n  "success": true\n}',
+      },
+      {
+        method: 'GET',
+        path: '/user/api/me',
+        summary: 'Read-only self-service view for the logged-in client: usage (up/down/total), expiry, enable state, last-online, subscription id + URLs, per-node share links, external links, and observed source IPs.',
+        response: '{\n  "success": true,\n  "obj": {\n    "email": "user@example.com",\n    "enable": true,\n    "up": 1048576,\n    "down": 2097152,\n    "total": 10737418240,\n    "expiryTime": 1735689600000,\n    "subId": "i7tvdpeffi0hvvf1",\n    "subUrl": "https://example.com:2096/sub/i7tvdpeffi0hvvf1",\n    "links": []\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/user/api/rotateSub',
+        summary: 'Rotate the logged-in client’s subscription id. Updates the clients table and every attached inbound’s settings, so old subscription URLs stop resolving. Returns the refreshed self-service view.',
+        response: '{\n  "success": true,\n  "obj": {\n    "subId": "9a1c…",\n    "subUrl": "https://example.com:2096/sub/9a1c…"\n  }\n}',
       },
     ],
   },

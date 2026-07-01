@@ -137,6 +137,7 @@ func TestAPIRoutesDocumented(t *testing.T) {
 			"/panel/nodes": true, "/panel/settings": true,
 			"/panel/xray": true, "/panel/outbound": true,
 			"/panel/routing": true, "/panel/api-docs": true,
+			"/user": true,
 		}
 		if spaPages[r.Path] {
 			continue

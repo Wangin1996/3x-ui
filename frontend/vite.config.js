@@ -211,6 +211,7 @@ export default defineConfig({
         index: path.resolve(__dirname, 'index.html'),
         login: path.resolve(__dirname, 'login.html'),
         subpage: path.resolve(__dirname, 'subpage.html'),
+        user: path.resolve(__dirname, 'user.html'),
       },
       output: {
         manualChunks(id) {

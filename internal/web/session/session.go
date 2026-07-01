@@ -16,6 +16,7 @@ import (
 const (
 	loginUserKey      = "LOGIN_USER"
 	loginEpochKey     = "LOGIN_EPOCH"
+	loginClientKey    = "LOGIN_CLIENT"
 	apiAuthUserKey    = "api_auth_user"
 	sessionCookieName = "3x-ui"
 )
@@ -157,6 +158,43 @@ func getUserByID(id int) (*model.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+// SetLoginClient stores an authenticated end-user (proxy client) id under a key
+// distinct from the admin LOGIN_USER, so the two privilege domains never cross:
+// the admin guard only reads LOGIN_USER and the user-portal guard only reads
+// LOGIN_CLIENT, even though both share the one "3x-ui" cookie.
+func SetLoginClient(c *gin.Context, clientID int) error {
+	if clientID <= 0 {
+		return nil
+	}
+	s := sessions.Default(c)
+	s.Set(loginClientKey, clientID)
+	return s.Save()
+}
+
+// GetLoginClientID returns the logged-in end-user client id from the session.
+func GetLoginClientID(c *gin.Context) (int, bool) {
+	s := sessions.Default(c)
+	obj := s.Get(loginClientKey)
+	if obj == nil {
+		return 0, false
+	}
+	return sessionUserID(obj)
+}
+
+// IsClientLogin reports whether an end-user (proxy client) is authenticated.
+func IsClientLogin(c *gin.Context) bool {
+	id, ok := GetLoginClientID(c)
+	return ok && id > 0
+}
+
+// ClearClientSession drops only the end-user login key, leaving any admin
+// session on the same cookie intact.
+func ClearClientSession(c *gin.Context) error {
+	s := sessions.Default(c)
+	s.Delete(loginClientKey)
+	return s.Save()
 }
 
 func ClearSession(c *gin.Context) error {

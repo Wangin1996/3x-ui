@@ -126,6 +126,34 @@
     "openMenu": "Menüyü aç"
   },
   "pages": {
+    "user": {
+      "loginTitle": "User Center",
+      "email": "Email",
+      "logout": "Log out",
+      "usage": "Usage",
+      "unlimited": "Unlimited",
+      "expiry": "Expiry",
+      "never": "Never",
+      "lastOnline": "Last online",
+      "subscription": "Subscription",
+      "subUrl": "Subscription URL",
+      "links": "Config links",
+      "onlineIps": "Recent IPs",
+      "rotate": "Reset link",
+      "rotateHint": "Resetting generates a new subscription link. Your old links stop working — update them everywhere after resetting.",
+      "status": {
+        "active": "Active",
+        "disabled": "Disabled",
+        "expired": "Expired"
+      },
+      "toasts": {
+        "fillRequired": "This field is required",
+        "wrongCredentials": "Wrong email or password",
+        "rotated": "Subscription link reset",
+        "rotateFailed": "Reset failed",
+        "copyFailed": "Copy failed"
+      }
+    },
     "login": {
       "hello": "Merhaba",
       "title": "Hoş Geldiniz",
@@ -721,6 +749,13 @@
       "sniffingDestOverride": "Hedef geçersiz kılma"
     },
     "clients": {
+      "portalPassword": {
+        "button": "Login password",
+        "title": "Set portal login password",
+        "hint": "The end user signs in to the User Center with their email and this password. Leave empty to disable their portal login.",
+        "placeholder": "New password (empty to disable)",
+        "saved": "Login password updated"
+      },
       "tabBasics": "Temel",
       "tabCredentials": "Kimlik Bilgileri",
       "tabLinks": "Bağlantılar",
