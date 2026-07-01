@@ -64,6 +64,7 @@ export const NodeFormSchema = z.object({
   id: z.number().optional(),
   name: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
   remark: z.string().optional(),
+  address: z.string().optional(),
   enable: z.boolean(),
 });
 

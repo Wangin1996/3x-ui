@@ -978,6 +978,10 @@
       "modePush": "Push（面板託管）",
       "modeAgent": "Agent（拉取）",
       "agentModeHint": "Agent 節點主動撥入主面板，因此位址與埠可選。儲存後會產生該節點的 guid，然後以 XUI_NODE_MASTER_URL、XUI_NODE_GUID 以及用戶端憑證或 API Token 執行 x-ui-node。",
+      "shareAddress": "分享位址（公網域名/IP）",
+      "shareAddressHint": "該節點分享連結使用的公網域名或 IP。留空則自動填入節點上報的公網 IP；仍為空時回退面板位址。",
+      "shareAddress": "分享位址（公網域名/IP）",
+      "shareAddressHint": "該節點的公網域名或 IP，僅用於產生的分享連結。留空則回退為面板位址。",
       "agentInstall": {
         "title": "安裝此 Agent 節點",
         "hint": "在節點機器上以 root 執行下面的命令。它會下載 x-ui-node、裝成 systemd 服務並連回本面板。",

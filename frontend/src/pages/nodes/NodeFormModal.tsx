@@ -22,6 +22,7 @@ function defaultValues(): NodeFormValues {
   return {
     name: '',
     remark: '',
+    address: '',
     enable: true,
   };
 }
@@ -66,6 +67,7 @@ export default function NodeFormModal({
         id: result.data.id || 0,
         name: result.data.name.trim(),
         remark: result.data.remark?.trim() || '',
+        address: result.data.address?.trim() || '',
         mode: 'agent',
         enable: result.data.enable,
       };
@@ -121,6 +123,13 @@ export default function NodeFormModal({
               </Form.Item>
             </Col>
           </Row>
+          <Form.Item
+            label={t('pages.nodes.shareAddress')}
+            name="address"
+            extra={t('pages.nodes.shareAddressHint')}
+          >
+            <Input placeholder="example.com" />
+          </Form.Item>
           <Form.Item label={t('pages.nodes.enable')} name="enable" valuePropName="checked">
             <Switch />
           </Form.Item>

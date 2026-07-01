@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"slices"
 	"strconv"
 	"strings"
@@ -529,6 +530,34 @@ func (s *NodeService) UpdateHeartbeat(id int, p HeartbeatPatch) error {
 		nodeMetrics.append(nodeMetricKey(id, "netDown"), now, float64(p.NetDown))
 	}
 	return nil
+}
+
+// AutofillAddress records the agent's public source IP as the node's share
+// address, but only when the operator has not set one. It is a convenience for
+// generated share links: the node dials in, so the master learns its egress IP
+// for free. A manually set address (e.g. a domain) always wins, and private or
+// loopback sources are ignored so an nginx-fronted master that forwards no real
+// client IP simply leaves the field blank.
+func (s *NodeService) AutofillAddress(id int, ip string) {
+	if !isPublicShareIP(ip) {
+		return
+	}
+	db := database.GetDB()
+	db.Model(model.Node{}).
+		Where("id = ? AND (address IS NULL OR address = '')", id).
+		Update("address", ip)
+}
+
+func isPublicShareIP(raw string) bool {
+	ip := net.ParseIP(strings.TrimSpace(raw))
+	if ip == nil {
+		return false
+	}
+	if ip.IsLoopback() || ip.IsUnspecified() || ip.IsPrivate() ||
+		ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+		return false
+	}
+	return true
 }
 
 // warnedDupGuid remembers the (nodeID -> guid) pairs already warned about so a

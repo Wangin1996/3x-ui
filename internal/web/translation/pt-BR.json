@@ -978,6 +978,10 @@
       "modePush": "Push (managed panel)",
       "modeAgent": "Agent (pull)",
       "agentModeHint": "Agent nodes dial in to the master, so address and port are optional. Save to generate this node's guid, then run x-ui-node with XUI_NODE_MASTER_URL, XUI_NODE_GUID, and a client certificate or API token.",
+      "shareAddress": "Endereço de compartilhamento (host público)",
+      "shareAddressHint": "Domínio ou IP público para os links de compartilhamento deste nó. Deixe em branco para preencher automaticamente com o IP informado pelo nó; se ainda ficar vazio, usa o endereço do painel.",
+      "shareAddress": "Endereço de compartilhamento (host público)",
+      "shareAddressHint": "O domínio ou IP público deste nó, usado apenas nos links de compartilhamento gerados. Deixe em branco para usar o endereço do painel.",
       "agentInstall": {
         "title": "Install this agent node",
         "hint": "Run this command on the node machine as root. It downloads x-ui-node, installs it as a systemd service, and connects it back to this panel.",

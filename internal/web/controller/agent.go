@@ -52,6 +52,7 @@ func (a *AgentController) ws(c *gin.Context) {
 		return
 	}
 	ac := websocket.RegisterAgent(node.Id, conn)
+	a.nodeService.AutofillAddress(node.Id, c.ClientIP())
 	_ = a.nodeService.UpdateHeartbeat(node.Id, service.HeartbeatPatch{Status: "online", LastHeartbeat: time.Now().Unix()})
 	defer func() {
 		websocket.UnregisterAgent(node.Id, ac)
@@ -126,6 +127,8 @@ func (a *AgentController) report(c *gin.Context) {
 		jsonMsg(c, "decode agent report", err)
 		return
 	}
+
+	a.nodeService.AutofillAddress(node.Id, c.ClientIP())
 
 	if err := a.inboundService.IngestAgentTraffic(node.Id, report.ClientTraffics); err != nil {
 		jsonMsg(c, "ingest agent traffic", err)

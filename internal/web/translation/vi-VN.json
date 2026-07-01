@@ -978,6 +978,10 @@
       "modePush": "Push (managed panel)",
       "modeAgent": "Agent (pull)",
       "agentModeHint": "Agent nodes dial in to the master, so address and port are optional. Save to generate this node's guid, then run x-ui-node with XUI_NODE_MASTER_URL, XUI_NODE_GUID, and a client certificate or API token.",
+      "shareAddress": "Địa chỉ chia sẻ (host công khai)",
+      "shareAddressHint": "Tên miền hoặc IP công khai cho link chia sẻ của node này. Để trống để tự động điền từ IP mà node báo về; nếu vẫn trống thì quay lại địa chỉ panel.",
+      "shareAddress": "Địa chỉ chia sẻ (host công khai)",
+      "shareAddressHint": "Tên miền hoặc IP công khai của node này, chỉ dùng trong link chia sẻ được tạo. Để trống để quay lại địa chỉ panel.",
       "agentInstall": {
         "title": "Install this agent node",
         "hint": "Run this command on the node machine as root. It downloads x-ui-node, installs it as a systemd service, and connects it back to this panel.",

@@ -177,7 +177,7 @@ export default function NodeList({
   const dataSource = useMemo<NodeRow[]>(() => {
     const toRow = (n: NodeRecord): NodeRow => ({
       ...n,
-      url: `${n.scheme}://${n.address}:${n.port}${n.basePath || '/'}`,
+      url: n.address || '',
       key: n.transitive ? `t-${n.guid || ''}` : n.id,
     });
     const childrenByParent = new Map<string, NodeRecord[]>();
@@ -283,14 +283,9 @@ export default function NodeList({
       dataIndex: 'url',
       ellipsis: true,
       render: (_value, record) => (
-        <a
-          href={record.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={showAddress ? 'address-visible' : 'address-hidden'}
-        >
-          {record.url}
-        </a>
+        <span className={showAddress ? 'address-visible' : 'address-hidden'}>
+          {record.url || '-'}
+        </span>
       ),
     },
     {
@@ -511,14 +506,9 @@ export default function NodeList({
                 )}
                 <div className="stat-row">
                   <span className="stat-label">{t('pages.nodes.address')}</span>
-                  <a
-                    href={statsNode.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={showAddress ? 'address-visible' : 'address-hidden'}
-                  >
-                    {statsNode.url}
-                  </a>
+                  <span className={showAddress ? 'address-visible' : 'address-hidden'}>
+                    {statsNode.url || '-'}
+                  </span>
                   <Tooltip title={t('pages.index.toggleIpVisibility')}>
                     {showAddress ? (
                       <EyeOutlined className="ip-toggle-icon" role="button" tabIndex={0} aria-label={t('pages.index.toggleIpVisibility')} onClick={() => setShowAddress(false)} onKeyDown={activateOnKey(() => setShowAddress(false))} />
