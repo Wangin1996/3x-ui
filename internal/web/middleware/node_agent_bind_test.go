@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -12,7 +13,7 @@ import (
 
 func TestBindNodeModeFromJSON(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	req := httptest.NewRequest("POST", "/", strings.NewReader(`{"name":"edge","mode":"agent","address":"","port":0}`))
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(`{"name":"edge","mode":"agent","address":"","port":0}`))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -29,7 +30,7 @@ func TestBindNodeModeFromJSON(t *testing.T) {
 
 func TestBindNodeModeFromForm(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	req := httptest.NewRequest("POST", "/", strings.NewReader("name=edge&mode=agent&address="))
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("name=edge&mode=agent&address="))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)

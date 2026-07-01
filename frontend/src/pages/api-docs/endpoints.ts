@@ -353,12 +353,6 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'GET',
-        path: '/panel/api/server/descendants',
-        summary: 'Read-only summaries (guid, parentGuid, name, address, status, versions) of the nodes this panel manages. A parent panel calls it on a node (via the node API token) to surface transitive sub-nodes in a chained topology. Counts are computed by the parent, not returned here.',
-        response: '{\n  "success": true,\n  "obj": [\n    {\n      "guid": "c3d4-...",\n      "parentGuid": "a1b2-...",\n      "name": "Node3",\n      "address": "10.0.0.3",\n      "status": "online"\n    }\n  ]\n}',
-      },
-      {
-        method: 'GET',
         path: '/panel/api/server/getNewX25519Cert',
         summary: 'Generate a new X25519 keypair for Reality.',
         response: '{\n  "success": true,\n  "obj": {\n    "privateKey": "uN9qLfV3zH8w...",\n    "publicKey": "5v8xPqR2sM7k..."\n  }\n}',
@@ -902,33 +896,12 @@ export const sections: readonly Section[] = [
         responseSchemaArray: true,
       },
       {
-        method: 'POST',
-        path: '/panel/api/nodes/mtls/ca',
-        summary: "This panel's node-auth CA certificate (public, PEM) to paste into a node's mTLS trust setting. Lazily mints the CA and the master client cert on first call. Pair with setting tlsVerifyMode=mtls on the node.",
-        response: '{\n  "success": true,\n  "obj": {\n    "caCert": "-----BEGIN CERTIFICATE-----\\n...\\n-----END CERTIFICATE-----\\n"\n  }\n}',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/nodes/mtls/trustCA',
-        summary: "Set the CA certificate this panel trusts for incoming node-API client certificates (this panel acting as a node). Paste the managing panel's CA (from nodes/mtls/ca). An empty caCert disables it. A non-empty value must be a PEM certificate. Applied on the next panel restart.",
-        body: '{\n  "caCert": "-----BEGIN CERTIFICATE-----\\n...\\n-----END CERTIFICATE-----\\n"\n}',
-      },
-      {
         method: 'GET',
         path: '/panel/api/nodes/get/:id',
         summary: 'Fetch a single node by ID.',
         params: [
           { name: 'id', in: 'path', type: 'number', desc: 'Node ID.' },
         ],
-      },
-      {
-        method: 'GET',
-        path: '/panel/api/nodes/webCert/:id',
-        summary: 'Fetch a node\'s own web TLS certificate/key file paths (proxied to the node). Used by the inbound form\'s "Set Cert from Panel" so a node-assigned inbound gets paths that exist on the node, not the central panel.',
-        params: [
-          { name: 'id', in: 'path', type: 'number', desc: 'Node ID.' },
-        ],
-        response: '{\n  "success": true,\n  "obj": {\n    "webCertFile": "/root/cert/example.com/fullchain.pem",\n    "webKeyFile": "/root/cert/example.com/privkey.pem"\n  }\n}',
       },
       {
         method: 'POST',
@@ -969,35 +942,6 @@ export const sections: readonly Section[] = [
         summary: 'Probe a node without saving it. Uses the body as connection details and returns the same heartbeat snapshot a registered node would have.',
         body: '{\n  "scheme": "https",\n  "address": "node1.example.com",\n  "port": 2053,\n  "basePath": "/",\n  "apiToken": "abcdef..."\n}',
         responseSchema: 'ProbeResultUI',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/nodes/certFingerprint',
-        summary: "Connect to the node over HTTPS without verifying its certificate and return the leaf certificate's SHA-256 (base64). Used by the Add/Edit Node dialog to fetch and pin a self-signed certificate. Uses the same body as /test.",
-        body: '{\n  "scheme": "https",\n  "address": "node1.example.com",\n  "port": 2053,\n  "basePath": "/"\n}',
-        response: '{\n  "success": true,\n  "obj": "k3b1...base64-sha256...="\n}',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/nodes/inbounds',
-        summary: 'Use unsaved node connection details to list the remote inbounds available for selective import.',
-        body: '{\n  "name": "de-fra-1",\n  "scheme": "https",\n  "address": "node1.example.com",\n  "port": 2053,\n  "basePath": "/",\n  "apiToken": "abcdef..."\n}',
-        response: '{\n  "success": true,\n  "obj": [\n    { "tag": "inbound-443", "remark": "VLESS", "protocol": "vless", "port": 443 }\n  ]\n}',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/nodes/probe/:id',
-        summary: 'Probe an existing node, updating its cached health state.',
-        params: [
-          { name: 'id', in: 'path', type: 'number', desc: 'Node ID.' },
-        ],
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/nodes/updatePanel',
-        summary: 'Trigger the official panel self-updater on each given node (downloads the latest release and restarts). Only enabled, online nodes are updated; offline/disabled ones are reported as skipped. Set "dev": true to move the nodes to the rolling per-commit dev channel instead of the latest stable release. Returns a per-node result list.',
-        body: '{\n  "ids": [1, 2, 3],\n  "dev": false\n}',
-        response: '{\n  "success": true,\n  "obj": [\n    { "id": 1, "name": "de-1", "ok": true },\n    { "id": 2, "name": "fr-1", "ok": false, "error": "node is offline" }\n  ]\n}',
       },
       {
         method: 'GET',

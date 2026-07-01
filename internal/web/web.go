@@ -504,24 +504,14 @@ func (s *Server) start(restartXray bool, startTgBot bool) (err error) {
 	)
 	s.cron.Start()
 
-	// Wire the inbound-runtime manager once so InboundService can route
-	// add/update/delete to either the local xray or a remote node panel.
-	// The closures bridge into XrayService (which owns the running xray
-	// process state) without forcing the runtime package to import service.
+	// Wire the inbound-runtime manager once so InboundService can route local
+	// inbound add/update/delete to the local xray. Node-assigned inbounds route
+	// to a no-op runtime (agents pull; the master never dials them). The closures
+	// bridge into XrayService without forcing the runtime package to import service.
 	runtime.SetManager(runtime.NewManager(runtime.LocalDeps{
 		APIPort:        func() int { return s.xrayService.GetXrayAPIPort() },
 		SetNeedRestart: func() { s.xrayService.SetToNeedRestart() },
 	}))
-	runtime.GetManager().SetNodeEgressResolver(&s.settingService)
-	// Supply the master client certificate for nodes in mtls mode. Issued lazily
-	// from the node CA on first use; runtime stays free of a service import.
-	runtime.SetMasterClientCertProvider(func() (tls.Certificate, error) {
-		ck, err := s.settingService.EnsureMasterClientCert()
-		if err != nil {
-			return tls.Certificate{}, err
-		}
-		return tls.X509KeyPair(ck.CertPEM, ck.KeyPEM)
-	})
 
 	engine, err := s.initRouter()
 	if err != nil {

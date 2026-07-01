@@ -19,15 +19,11 @@ import (
 )
 
 func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (needRestart bool, clientsDisabled bool, err error) {
-	var disabledNodeIDs []int
 	err = submitTrafficWrite(func() error {
 		var inner error
-		needRestart, clientsDisabled, disabledNodeIDs, inner = s.addTrafficLocked(inboundTraffics, clientTraffics)
+		needRestart, clientsDisabled, _, inner = s.addTrafficLocked(inboundTraffics, clientTraffics)
 		return inner
 	})
-	if err == nil && len(disabledNodeIDs) > 0 {
-		s.restartRemoteNodesOnDisable(disabledNodeIDs)
-	}
 	return
 }
 

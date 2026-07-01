@@ -122,20 +122,3 @@ func tombstoneClientEmails(emails []string) {
 		}
 	}
 }
-
-func isClientEmailTombstoned(email string) bool {
-	if email == "" {
-		return false
-	}
-	recentlyDeletedMu.Lock()
-	defer recentlyDeletedMu.Unlock()
-	ts, ok := recentlyDeleted[email]
-	if !ok {
-		return false
-	}
-	if time.Since(ts) > deleteTombstoneTTL {
-		delete(recentlyDeleted, email)
-		return false
-	}
-	return true
-}

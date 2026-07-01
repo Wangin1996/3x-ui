@@ -1,7 +1,6 @@
 package job
 
 import (
-	"context"
 	"strconv"
 	"sync"
 	"time"
@@ -9,7 +8,6 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/websocket"
 )
@@ -44,30 +42,16 @@ func (j *NodeHeartbeatJob) Run() {
 		return
 	}
 
-	sem := make(chan struct{}, nodeHeartbeatConcurrency)
-	var wg sync.WaitGroup
 	for _, n := range nodes {
-		if !n.Enable || n.Mode == "agent" {
-			if n.Mode == "agent" {
-				j.sweepAgent(n)
-			}
-			continue
+		if n.Enable {
+			j.sweepAgent(n)
 		}
-		wg.Add(1)
-		sem <- struct{}{}
-		n := n
-		common.GoRecover("node-heartbeat:"+n.Name, func() {
-			defer wg.Done()
-			defer func() { <-sem }()
-			j.probeOne(n)
-		})
 	}
-	wg.Wait()
 
 	if !websocket.HasClients() {
 		return
 	}
-	updated, err := j.nodeService.GetNodeTree()
+	updated, err := j.nodeService.GetAll()
 	if err != nil {
 		logger.Warning("node heartbeat: load nodes for broadcast failed:", err)
 		return
@@ -91,32 +75,6 @@ func (j *NodeHeartbeatJob) sweepAgent(n *model.Node) {
 		return
 	}
 	publishNodeTransition(n, n.Status, patch)
-}
-
-func (j *NodeHeartbeatJob) probeOne(n *model.Node) {
-	ctx, cancel := context.WithTimeout(context.Background(), nodeHeartbeatRequestTimeout)
-	defer cancel()
-	prevStatus := n.Status
-	patch, err := j.nodeService.Probe(ctx, n)
-	if err != nil {
-		patch.Status = "offline"
-	} else {
-		patch.Status = "online"
-	}
-	if updErr := j.nodeService.UpdateHeartbeat(n.Id, patch); updErr != nil {
-		logger.Warning("node heartbeat: update node", n.Id, "failed:", updErr)
-	}
-	publishNodeTransition(n, prevStatus, patch)
-	// Learn the nodes this node manages so the panel can surface them as
-	// transitive sub-nodes (#4983). Fresh context — the probe budget above may
-	// be spent. Drop them when the node is unreachable.
-	if patch.Status == "online" {
-		dctx, dcancel := context.WithTimeout(context.Background(), nodeHeartbeatRequestTimeout)
-		j.nodeService.RefreshDescendants(dctx, n)
-		dcancel()
-	} else {
-		j.nodeService.ClearDescendants(n.Id)
-	}
 }
 
 // publishNodeTransition emits node.down / node.up only on a genuine state change.

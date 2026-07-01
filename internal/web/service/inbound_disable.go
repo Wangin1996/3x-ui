@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -179,26 +178,27 @@ func (s *InboundService) disableInvalidClients(tx *gorm.DB) (bool, int64, []int,
 		}
 	}
 
-	disabledNodeIDs := make(map[int]struct{})
+	dirtyNodeIDs := make(map[int]struct{})
 	for inboundID, group := range remoteByInbound {
 		emails := make(map[string]struct{}, len(group))
 		for _, t := range group {
 			emails[t.Email] = struct{}{}
 		}
-		if pushErr := s.disableRemoteClients(tx, inboundID, emails); pushErr != nil {
-			logger.Warning("disableInvalidClients: push to remote failed for inbound", inboundID, ":", pushErr)
-			needRestart = true
-		} else {
-			for _, t := range group {
-				if t.NodeID != nil {
-					disabledNodeIDs[*t.NodeID] = struct{}{}
-				}
+		if _, _, mErr := s.markClientsDisabledInSettings(tx, inboundID, emails); mErr != nil {
+			logger.Warning("disableInvalidClients: settings sync failed for inbound", inboundID, ":", mErr)
+		}
+		for _, t := range group {
+			if t.NodeID != nil {
+				dirtyNodeIDs[*t.NodeID] = struct{}{}
 			}
 		}
 	}
 
-	nodeIDs := make([]int, 0, len(disabledNodeIDs))
-	for nodeID := range disabledNodeIDs {
+	nodeIDs := make([]int, 0, len(dirtyNodeIDs))
+	for nodeID := range dirtyNodeIDs {
+		if dErr := (&NodeService{}).MarkNodeDirtyTx(tx, nodeID); dErr != nil {
+			logger.Warning("disableInvalidClients: mark node dirty failed for", nodeID, ":", dErr)
+		}
 		nodeIDs = append(nodeIDs, nodeID)
 	}
 
@@ -253,20 +253,4 @@ func (s *InboundService) markClientsDisabledInSettings(tx *gorm.DB, inboundID in
 		return nil, nil, err
 	}
 	return &snapshot, &ib, nil
-}
-
-func (s *InboundService) disableRemoteClients(tx *gorm.DB, inboundID int, emails map[string]struct{}) error {
-	oldSnapshot, ib, err := s.markClientsDisabledInSettings(tx, inboundID, emails)
-	if err != nil {
-		return err
-	}
-
-	rt, err := s.runtimeFor(ib)
-	if err != nil {
-		return err
-	}
-	if err := rt.UpdateInbound(context.Background(), oldSnapshot, ib); err != nil {
-		return err
-	}
-	return nil
 }

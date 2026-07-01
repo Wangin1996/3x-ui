@@ -57,42 +57,14 @@ export const ProbeResultSchema = z.object({
   xrayError: z.string().optional(),
 }).loose();
 
+// Agent-only fork: nodes are pull-mode x-ui-node agents that dial in. The form
+// only needs a name and enable flag; the master auto-generates the guid/token
+// and never dials the node.
 export const NodeFormSchema = z.object({
   id: z.number().optional(),
   name: z.string().trim().min(1, 'pages.nodes.toasts.fillRequired'),
   remark: z.string().optional(),
-  // Pull-mode agent nodes dial in to the master, so address/port are
-  // informational and not required; push-mode nodes need a routable target,
-  // enforced in the superRefine below.
-  mode: z.enum(['push', 'agent']).optional().default('push'),
-  scheme: z.enum(['http', 'https']),
-  address: z.string().trim(),
-  port: z.number().int().max(65535),
-  basePath: z.string(),
-  // mTLS nodes authenticate via the client certificate, so the token is optional
-  // there; every other verify mode still requires one (matches remote.do()).
-  apiToken: z.string().trim(),
   enable: z.boolean(),
-  allowPrivateAddress: z.boolean(),
-  tlsVerifyMode: z.enum(['verify', 'skip', 'pin', 'mtls']),
-  pinnedCertSha256: z.string().optional().default(''),
-  inboundSyncMode: z.enum(['all', 'selected']).optional().default('all'),
-  // Unmounted when sync mode is "all" (absent from antd onFinish values) and
-  // serialized as null by the backend for a nil slice — tolerate both.
-  inboundTags: z.array(z.string()).nullish().transform((tags) => tags ?? []),
-  outboundTag: z.string().optional(),
-}).superRefine((val, ctx) => {
-  if (val.mode !== 'agent') {
-    if (val.address.length === 0) {
-      ctx.addIssue({ code: 'custom', path: ['address'], message: 'pages.nodes.toasts.fillRequired' });
-    }
-    if (val.port < 1) {
-      ctx.addIssue({ code: 'custom', path: ['port'], message: 'pages.nodes.toasts.fillRequired' });
-    }
-    if (val.tlsVerifyMode !== 'mtls' && val.apiToken.length === 0) {
-      ctx.addIssue({ code: 'custom', path: ['apiToken'], message: 'pages.nodes.toasts.fillRequired' });
-    }
-  }
 });
 
 export type NodeRecord = z.infer<typeof NodeRecordSchema>;
