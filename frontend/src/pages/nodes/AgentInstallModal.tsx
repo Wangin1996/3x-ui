@@ -16,10 +16,18 @@ interface AgentInstallModalProps {
   onClose: () => void;
 }
 
+function defaultMasterUrl(): string {
+  const bp = window.X_UI_BASE_PATH;
+  const base = typeof bp === 'string' && bp !== '' && bp !== '/'
+    ? '/' + bp.replace(/^\/+|\/+$/g, '')
+    : '';
+  return window.location.origin + base;
+}
+
 export default function AgentInstallModal({ open, node, onClose }: AgentInstallModalProps) {
   const { t } = useTranslation();
   const [master, setMaster] = useState('');
-  const masterUrl = (master || window.location.origin).replace(/\/+$/, '');
+  const masterUrl = (master || defaultMasterUrl()).replace(/\/+$/, '');
 
   const command = useMemo(() => {
     const guid = node?.guid ?? '';
@@ -46,7 +54,7 @@ export default function AgentInstallModal({ open, node, onClose }: AgentInstallM
         <div>
           <Typography.Text strong>{t('pages.nodes.agentInstall.masterUrl')}</Typography.Text>
           <Input
-            value={master || window.location.origin}
+            value={master || defaultMasterUrl()}
             onChange={(e) => setMaster(e.target.value)}
             style={{ marginTop: 4 }}
           />
