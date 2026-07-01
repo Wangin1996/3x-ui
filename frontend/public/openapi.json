@@ -10482,7 +10482,7 @@
         "tags": [
           "User Portal"
         ],
-        "summary": "Read-only self-service view for the logged-in client: usage (up/down/total), expiry, enable state, last-online, subscription id + URLs, per-node share links, external links, and observed source IPs.",
+        "summary": "Read-only self-service view for the logged-in client: usage (up/down/total), expiry, enable state, last-online, subscription id + paths/overrides (the client builds absolute URLs from its own origin), per-node share links, external links, and observed source IPs.",
         "operationId": "get_user_api_me",
         "responses": {
           "200": {
@@ -10511,7 +10511,10 @@
                     "total": 10737418240,
                     "expiryTime": 1735689600000,
                     "subId": "i7tvdpeffi0hvvf1",
-                    "subUrl": "https://example.com:2096/sub/i7tvdpeffi0hvvf1",
+                    "subEnable": true,
+                    "subClashEnable": true,
+                    "subPath": "/sub/",
+                    "subClashPath": "/clash/",
                     "links": []
                   }
                 }
@@ -10549,7 +10552,7 @@
                   "success": true,
                   "obj": {
                     "subId": "9a1c…",
-                    "subUrl": "https://example.com:2096/sub/9a1c…"
+                    "subPath": "/sub/"
                   }
                 }
               }

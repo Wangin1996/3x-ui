@@ -1521,14 +1521,14 @@ export const sections: readonly Section[] = [
       {
         method: 'GET',
         path: '/user/api/me',
-        summary: 'Read-only self-service view for the logged-in client: usage (up/down/total), expiry, enable state, last-online, subscription id + URLs, per-node share links, external links, and observed source IPs.',
-        response: '{\n  "success": true,\n  "obj": {\n    "email": "user@example.com",\n    "enable": true,\n    "up": 1048576,\n    "down": 2097152,\n    "total": 10737418240,\n    "expiryTime": 1735689600000,\n    "subId": "i7tvdpeffi0hvvf1",\n    "subUrl": "https://example.com:2096/sub/i7tvdpeffi0hvvf1",\n    "links": []\n  }\n}',
+        summary: 'Read-only self-service view for the logged-in client: usage (up/down/total), expiry, enable state, last-online, subscription id + paths/overrides (the client builds absolute URLs from its own origin), per-node share links, external links, and observed source IPs.',
+        response: '{\n  "success": true,\n  "obj": {\n    "email": "user@example.com",\n    "enable": true,\n    "up": 1048576,\n    "down": 2097152,\n    "total": 10737418240,\n    "expiryTime": 1735689600000,\n    "subId": "i7tvdpeffi0hvvf1",\n    "subEnable": true,\n    "subClashEnable": true,\n    "subPath": "/sub/",\n    "subClashPath": "/clash/",\n    "links": []\n  }\n}',
       },
       {
         method: 'POST',
         path: '/user/api/rotateSub',
         summary: 'Rotate the logged-in client’s subscription id. Updates the clients table and every attached inbound’s settings, so old subscription URLs stop resolving. Returns the refreshed self-service view.',
-        response: '{\n  "success": true,\n  "obj": {\n    "subId": "9a1c…",\n    "subUrl": "https://example.com:2096/sub/9a1c…"\n  }\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "subId": "9a1c…",\n    "subPath": "/sub/"\n  }\n}',
       },
     ],
   },

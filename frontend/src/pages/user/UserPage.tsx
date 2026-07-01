@@ -50,12 +50,24 @@ interface SelfView {
   expiryTime: number;
   lastOnline: number;
   subId: string;
-  subUrl: string;
-  subJsonUrl: string;
-  subClashUrl: string;
+  subEnable: boolean;
+  subJsonEnable: boolean;
+  subClashEnable: boolean;
+  subPath: string;
+  subJsonPath: string;
+  subClashPath: string;
+  subUri: string;
+  subJsonUri: string;
+  subClashUri: string;
   links: string[] | null;
   externalLinks: ExternalLink[] | null;
   ips: IpInfo[] | null;
+}
+
+function buildSubUrl(override: string, path: string, subId: string): string {
+  if (!subId) return '';
+  const base = override || (window.location.origin + path);
+  return base.endsWith('/') ? base + subId : `${base}/${subId}`;
 }
 
 interface LoginValues {
@@ -241,9 +253,9 @@ export default function UserPage() {
       >
         <Alert type="warning" showIcon style={{ marginBottom: 12 }} message={t('pages.user.rotateHint')} />
         <Descriptions column={1} size="small" bordered>
-          {renderSubRow(t('pages.user.subUrl'), v.subUrl)}
-          {renderSubRow('JSON', v.subJsonUrl)}
-          {renderSubRow('Clash', v.subClashUrl)}
+          {v.subEnable && renderSubRow(t('pages.user.subUrl'), buildSubUrl(v.subUri, v.subPath, v.subId))}
+          {v.subJsonEnable && renderSubRow('JSON', buildSubUrl(v.subJsonUri, v.subJsonPath, v.subId))}
+          {v.subClashEnable && renderSubRow('Clash', buildSubUrl(v.subClashUri, v.subClashPath, v.subId))}
         </Descriptions>
       </Card>
 

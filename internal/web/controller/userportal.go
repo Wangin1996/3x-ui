@@ -31,10 +31,24 @@ type ClientSelfView struct {
 	Total         int64    `json:"total"`
 	ExpiryTime    int64    `json:"expiryTime"`
 	LastOnline    int64    `json:"lastOnline"`
-	SubID         string   `json:"subId"`
-	SubURL        string   `json:"subUrl"`
-	SubJsonURL    string   `json:"subJsonUrl"`
-	SubClashURL   string   `json:"subClashUrl"`
+	SubID string `json:"subId"`
+	// The subscription is served at the site root off the panel's own origin,
+	// so the frontend builds the final URLs from window.location.origin (exactly
+	// the public address the browser used) plus these paths — a configured URI
+	// override wins. This mirrors how the node install command derives its URL and
+	// avoids the panel guessing a port behind a reverse proxy.
+	SubEnable      bool `json:"subEnable"`
+	SubJsonEnable  bool `json:"subJsonEnable"`
+	SubClashEnable bool `json:"subClashEnable"`
+
+	SubPath      string `json:"subPath"`
+	SubJsonPath  string `json:"subJsonPath"`
+	SubClashPath string `json:"subClashPath"`
+
+	SubURI      string `json:"subUri"`
+	SubJsonURI  string `json:"subJsonUri"`
+	SubClashURI string `json:"subClashUri"`
+
 	Links         []string `json:"links"`
 	ExternalLinks any      `json:"externalLinks"`
 	Ips           any      `json:"ips"`
@@ -153,18 +167,15 @@ func (a *UserPortalController) buildView(c *gin.Context, rec *model.ClientRecord
 	if ips, err := a.inboundService.GetClientIpsWithNodes(rec.Email); err == nil {
 		view.Ips = ips
 	}
-	if rec.SubID != "" {
-		sub, jsonURL, clashURL, _ := a.inboundService.GetSubURLs(host, rec.SubID)
-		if enabled, _ := a.settingService.GetSubEnable(); enabled {
-			view.SubURL = sub
-		}
-		if enabled, _ := a.settingService.GetSubJsonEnable(); enabled {
-			view.SubJsonURL = jsonURL
-		}
-		if enabled, _ := a.settingService.GetSubClashEnable(); enabled {
-			view.SubClashURL = clashURL
-		}
-	}
+	view.SubEnable, _ = a.settingService.GetSubEnable()
+	view.SubJsonEnable, _ = a.settingService.GetSubJsonEnable()
+	view.SubClashEnable, _ = a.settingService.GetSubClashEnable()
+	view.SubPath, _ = a.settingService.GetSubPath()
+	view.SubJsonPath, _ = a.settingService.GetSubJsonPath()
+	view.SubClashPath, _ = a.settingService.GetSubClashPath()
+	view.SubURI, _ = a.settingService.GetSubURI()
+	view.SubJsonURI, _ = a.settingService.GetSubJsonURI()
+	view.SubClashURI, _ = a.settingService.GetSubClashURI()
 	return view
 }
 
