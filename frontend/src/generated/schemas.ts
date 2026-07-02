@@ -20,77 +20,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "URI for external traffic reporting",
         "type": "string"
       },
-      "ldapAutoCreate": {
-        "type": "boolean"
-      },
-      "ldapAutoDelete": {
-        "type": "boolean"
-      },
-      "ldapBaseDN": {
-        "type": "string"
-      },
-      "ldapBindDN": {
-        "type": "string"
-      },
-      "ldapDefaultExpiryDays": {
-        "minimum": 0,
-        "type": "integer"
-      },
-      "ldapDefaultLimitIP": {
-        "minimum": 0,
-        "type": "integer"
-      },
-      "ldapDefaultTotalGB": {
-        "minimum": 0,
-        "type": "integer"
-      },
-      "ldapEnable": {
-        "description": "LDAP settings",
-        "type": "boolean"
-      },
-      "ldapFlagField": {
-        "description": "Generic flag configuration",
-        "type": "string"
-      },
-      "ldapHost": {
-        "type": "string"
-      },
-      "ldapInboundTags": {
-        "type": "string"
-      },
-      "ldapInsecureSkipVerify": {
-        "type": "boolean"
-      },
-      "ldapInvertFlag": {
-        "type": "boolean"
-      },
-      "ldapPassword": {
-        "type": "string"
-      },
-      "ldapPort": {
-        "maximum": 65535,
-        "minimum": 0,
-        "type": "integer"
-      },
-      "ldapSyncCron": {
-        "type": "string"
-      },
-      "ldapTruthyValues": {
-        "type": "string"
-      },
-      "ldapUseTLS": {
-        "type": "boolean"
-      },
-      "ldapUserAttr": {
-        "description": "e.g., mail or uid",
-        "type": "string"
-      },
-      "ldapUserFilter": {
-        "type": "string"
-      },
-      "ldapVlessField": {
-        "type": "string"
-      },
       "pageSize": {
         "description": "UI settings\nNumber of items per page in lists (0 disables pagination)",
         "maximum": 1000,
@@ -355,27 +284,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "expireDiff",
       "externalTrafficInformEnable",
       "externalTrafficInformURI",
-      "ldapAutoCreate",
-      "ldapAutoDelete",
-      "ldapBaseDN",
-      "ldapBindDN",
-      "ldapDefaultExpiryDays",
-      "ldapDefaultLimitIP",
-      "ldapDefaultTotalGB",
-      "ldapEnable",
-      "ldapFlagField",
-      "ldapHost",
-      "ldapInboundTags",
-      "ldapInsecureSkipVerify",
-      "ldapInvertFlag",
-      "ldapPassword",
-      "ldapPort",
-      "ldapSyncCron",
-      "ldapTruthyValues",
-      "ldapUseTLS",
-      "ldapUserAttr",
-      "ldapUserFilter",
-      "ldapVlessField",
       "pageSize",
       "panelOutbound",
       "remarkTemplate",
@@ -462,9 +370,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "hasApiToken": {
         "type": "boolean"
       },
-      "hasLdapPassword": {
-        "type": "boolean"
-      },
       "hasNordSecret": {
         "type": "boolean"
       },
@@ -476,77 +381,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "hasWarpSecret": {
         "type": "boolean"
-      },
-      "ldapAutoCreate": {
-        "type": "boolean"
-      },
-      "ldapAutoDelete": {
-        "type": "boolean"
-      },
-      "ldapBaseDN": {
-        "type": "string"
-      },
-      "ldapBindDN": {
-        "type": "string"
-      },
-      "ldapDefaultExpiryDays": {
-        "minimum": 0,
-        "type": "integer"
-      },
-      "ldapDefaultLimitIP": {
-        "minimum": 0,
-        "type": "integer"
-      },
-      "ldapDefaultTotalGB": {
-        "minimum": 0,
-        "type": "integer"
-      },
-      "ldapEnable": {
-        "description": "LDAP settings",
-        "type": "boolean"
-      },
-      "ldapFlagField": {
-        "description": "Generic flag configuration",
-        "type": "string"
-      },
-      "ldapHost": {
-        "type": "string"
-      },
-      "ldapInboundTags": {
-        "type": "string"
-      },
-      "ldapInsecureSkipVerify": {
-        "type": "boolean"
-      },
-      "ldapInvertFlag": {
-        "type": "boolean"
-      },
-      "ldapPassword": {
-        "type": "string"
-      },
-      "ldapPort": {
-        "maximum": 65535,
-        "minimum": 0,
-        "type": "integer"
-      },
-      "ldapSyncCron": {
-        "type": "string"
-      },
-      "ldapTruthyValues": {
-        "type": "string"
-      },
-      "ldapUseTLS": {
-        "type": "boolean"
-      },
-      "ldapUserAttr": {
-        "description": "e.g., mail or uid",
-        "type": "string"
-      },
-      "ldapUserFilter": {
-        "type": "string"
-      },
-      "ldapVlessField": {
-        "type": "string"
       },
       "pageSize": {
         "description": "UI settings\nNumber of items per page in lists (0 disables pagination)",
@@ -813,32 +647,10 @@ export const SCHEMAS: Record<string, unknown> = {
       "externalTrafficInformEnable",
       "externalTrafficInformURI",
       "hasApiToken",
-      "hasLdapPassword",
       "hasNordSecret",
       "hasSmtpPassword",
       "hasTwoFactorToken",
       "hasWarpSecret",
-      "ldapAutoCreate",
-      "ldapAutoDelete",
-      "ldapBaseDN",
-      "ldapBindDN",
-      "ldapDefaultExpiryDays",
-      "ldapDefaultLimitIP",
-      "ldapDefaultTotalGB",
-      "ldapEnable",
-      "ldapFlagField",
-      "ldapHost",
-      "ldapInboundTags",
-      "ldapInsecureSkipVerify",
-      "ldapInvertFlag",
-      "ldapPassword",
-      "ldapPort",
-      "ldapSyncCron",
-      "ldapTruthyValues",
-      "ldapUseTLS",
-      "ldapUserAttr",
-      "ldapUserFilter",
-      "ldapVlessField",
       "pageSize",
       "panelOutbound",
       "remarkTemplate",

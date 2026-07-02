@@ -95,29 +95,6 @@ type AllSetting struct {
 	SubThemeDir                 string `json:"subThemeDir" form:"subThemeDir"`           // Absolute path to a folder containing a custom subscription page template
 	SubHideSettings             bool   `json:"subHideSettings" form:"subHideSettings"`   // Hide server settings in happ subscription (Only for Happ)
 
-	// LDAP settings
-	LdapEnable             bool   `json:"ldapEnable" form:"ldapEnable"`
-	LdapHost               string `json:"ldapHost" form:"ldapHost"`
-	LdapPort               int    `json:"ldapPort" form:"ldapPort" validate:"gte=0,lte=65535"`
-	LdapUseTLS             bool   `json:"ldapUseTLS" form:"ldapUseTLS"`
-	LdapInsecureSkipVerify bool   `json:"ldapInsecureSkipVerify" form:"ldapInsecureSkipVerify"`
-	LdapBindDN             string `json:"ldapBindDN" form:"ldapBindDN"`
-	LdapPassword           string `json:"ldapPassword" form:"ldapPassword"`
-	LdapBaseDN             string `json:"ldapBaseDN" form:"ldapBaseDN"`
-	LdapUserFilter         string `json:"ldapUserFilter" form:"ldapUserFilter"`
-	LdapUserAttr           string `json:"ldapUserAttr" form:"ldapUserAttr"` // e.g., mail or uid
-	LdapVlessField         string `json:"ldapVlessField" form:"ldapVlessField"`
-	LdapSyncCron           string `json:"ldapSyncCron" form:"ldapSyncCron"`
-	// Generic flag configuration
-	LdapFlagField         string `json:"ldapFlagField" form:"ldapFlagField"`
-	LdapTruthyValues      string `json:"ldapTruthyValues" form:"ldapTruthyValues"`
-	LdapInvertFlag        bool   `json:"ldapInvertFlag" form:"ldapInvertFlag"`
-	LdapInboundTags       string `json:"ldapInboundTags" form:"ldapInboundTags"`
-	LdapAutoCreate        bool   `json:"ldapAutoCreate" form:"ldapAutoCreate"`
-	LdapAutoDelete        bool   `json:"ldapAutoDelete" form:"ldapAutoDelete"`
-	LdapDefaultTotalGB    int    `json:"ldapDefaultTotalGB" form:"ldapDefaultTotalGB" validate:"gte=0"`
-	LdapDefaultExpiryDays int    `json:"ldapDefaultExpiryDays" form:"ldapDefaultExpiryDays" validate:"gte=0"`
-	LdapDefaultLimitIP    int    `json:"ldapDefaultLimitIP" form:"ldapDefaultLimitIP" validate:"gte=0"`
 	// JSON subscription routing rules
 
 	// WARP
@@ -131,7 +108,6 @@ type AllSettingView struct {
 	AllSetting
 
 	HasTwoFactorToken bool `json:"hasTwoFactorToken"`
-	HasLdapPassword   bool `json:"hasLdapPassword"`
 	HasApiToken       bool `json:"hasApiToken"`
 	HasWarpSecret     bool `json:"hasWarpSecret"`
 	HasNordSecret     bool `json:"hasNordSecret"`

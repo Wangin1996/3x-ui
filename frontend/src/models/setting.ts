@@ -57,27 +57,6 @@ export class AllSetting {
 
   timeLocation = 'Local';
 
-  ldapEnable = false;
-  ldapHost = '';
-  ldapPort = 389;
-  ldapUseTLS = false;
-  ldapInsecureSkipVerify = false;
-  ldapBindDN = '';
-  ldapPassword = '';
-  ldapBaseDN = '';
-  ldapUserFilter = '(objectClass=person)';
-  ldapUserAttr = 'mail';
-  ldapVlessField = 'vless_enabled';
-  ldapSyncCron = '@every 1m';
-  ldapFlagField = '';
-  ldapTruthyValues = 'true,1,yes,on';
-  ldapInvertFlag = false;
-  ldapInboundTags = '';
-  ldapAutoCreate = false;
-  ldapAutoDelete = false;
-  ldapDefaultTotalGB = 0;
-  ldapDefaultExpiryDays = 0;
-  ldapDefaultLimitIP = 0;
   smtpEnable = false;
   smtpHost = '';
   smtpPort = 587;
@@ -89,7 +68,6 @@ export class AllSetting {
   smtpCpu = 80;
   smtpMemory = 80;
   hasTwoFactorToken = false;
-  hasLdapPassword = false;
   hasApiToken = false;
   hasWarpSecret = false;
   hasNordSecret = false;

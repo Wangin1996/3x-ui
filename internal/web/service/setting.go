@@ -106,27 +106,6 @@ var defaultValueMap = map[string]string{
 	"devChannelEnable":            "false",
 
 	// LDAP defaults
-	"ldapEnable":             "false",
-	"ldapHost":               "",
-	"ldapPort":               "389",
-	"ldapUseTLS":             "false",
-	"ldapInsecureSkipVerify": "false",
-	"ldapBindDN":             "",
-	"ldapPassword":           "",
-	"ldapBaseDN":             "",
-	"ldapUserFilter":         "(objectClass=person)",
-	"ldapUserAttr":           "mail",
-	"ldapVlessField":         "vless_enabled",
-	"ldapSyncCron":           "@every 1m",
-	"ldapFlagField":          "",
-	"ldapTruthyValues":       "true,1,yes,on",
-	"ldapInvertFlag":         "false",
-	"ldapInboundTags":        "",
-	"ldapAutoCreate":         "false",
-	"ldapAutoDelete":         "false",
-	"ldapDefaultTotalGB":     "0",
-	"ldapDefaultExpiryDays":  "0",
-	"ldapDefaultLimitIP":     "0",
 
 	// Event bus — per-subscriber event filtering (empty = all disabled)
 	"smtpEnabledEvents": "login.attempt,cpu.high",
@@ -238,7 +217,6 @@ func (s *SettingService) GetAllSettingView() (*entity.AllSettingView, error) {
 	}
 	view := &entity.AllSettingView{AllSetting: *allSetting}
 	view.HasTwoFactorToken = secretConfigured(allSetting.TwoFactorToken)
-	view.HasLdapPassword = secretConfigured(allSetting.LdapPassword)
 	view.HasWarpSecret = secretConfigured(mustString(s.GetWarp()))
 	view.HasNordSecret = secretConfigured(mustString(s.GetNord()))
 	view.HasSmtpPassword = secretConfigured(allSetting.SmtpPassword)
@@ -247,7 +225,6 @@ func (s *SettingService) GetAllSettingView() (*entity.AllSettingView, error) {
 		view.HasApiToken = apiTokenCount > 0
 	}
 	view.TwoFactorToken = ""
-	view.LdapPassword = ""
 	view.SmtpPassword = ""
 	return view, nil
 }
@@ -835,91 +812,6 @@ func (s *SettingService) GetAccessLogEnable() (bool, error) {
 	return (accessLogPath != "none" && accessLogPath != ""), nil
 }
 
-// GetLdapEnable returns whether LDAP is enabled.
-func (s *SettingService) GetLdapEnable() (bool, error) {
-	return s.getBool("ldapEnable")
-}
-
-func (s *SettingService) GetLdapHost() (string, error) {
-	return s.getString("ldapHost")
-}
-
-func (s *SettingService) GetLdapPort() (int, error) {
-	return s.getInt("ldapPort")
-}
-
-func (s *SettingService) GetLdapUseTLS() (bool, error) {
-	return s.getBool("ldapUseTLS")
-}
-
-func (s *SettingService) GetLdapInsecureSkipVerify() (bool, error) {
-	return s.getBool("ldapInsecureSkipVerify")
-}
-
-func (s *SettingService) GetLdapBindDN() (string, error) {
-	return s.getString("ldapBindDN")
-}
-
-func (s *SettingService) GetLdapPassword() (string, error) {
-	return s.getString("ldapPassword")
-}
-
-func (s *SettingService) GetLdapBaseDN() (string, error) {
-	return s.getString("ldapBaseDN")
-}
-
-func (s *SettingService) GetLdapUserFilter() (string, error) {
-	return s.getString("ldapUserFilter")
-}
-
-func (s *SettingService) GetLdapUserAttr() (string, error) {
-	return s.getString("ldapUserAttr")
-}
-
-func (s *SettingService) GetLdapVlessField() (string, error) {
-	return s.getString("ldapVlessField")
-}
-
-func (s *SettingService) GetLdapSyncCron() (string, error) {
-	return s.getString("ldapSyncCron")
-}
-
-func (s *SettingService) GetLdapFlagField() (string, error) {
-	return s.getString("ldapFlagField")
-}
-
-func (s *SettingService) GetLdapTruthyValues() (string, error) {
-	return s.getString("ldapTruthyValues")
-}
-
-func (s *SettingService) GetLdapInvertFlag() (bool, error) {
-	return s.getBool("ldapInvertFlag")
-}
-
-func (s *SettingService) GetLdapInboundTags() (string, error) {
-	return s.getString("ldapInboundTags")
-}
-
-func (s *SettingService) GetLdapAutoCreate() (bool, error) {
-	return s.getBool("ldapAutoCreate")
-}
-
-func (s *SettingService) GetLdapAutoDelete() (bool, error) {
-	return s.getBool("ldapAutoDelete")
-}
-
-func (s *SettingService) GetLdapDefaultTotalGB() (int, error) {
-	return s.getInt("ldapDefaultTotalGB")
-}
-
-func (s *SettingService) GetLdapDefaultExpiryDays() (int, error) {
-	return s.getInt("ldapDefaultExpiryDays")
-}
-
-func (s *SettingService) GetLdapDefaultLimitIP() (int, error) {
-	return s.getInt("ldapDefaultLimitIP")
-}
-
 // Event bus — per-subscriber event filtering
 
 func (s *SettingService) GetSmtpEnabledEvents() (string, error) {
@@ -1052,13 +944,6 @@ func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting) error {
 }
 
 func (s *SettingService) preserveRedactedSecrets(allSetting *entity.AllSetting) error {
-	if strings.TrimSpace(allSetting.LdapPassword) == "" {
-		value, err := s.GetLdapPassword()
-		if err != nil {
-			return err
-		}
-		allSetting.LdapPassword = value
-	}
 	if allSetting.TwoFactorEnable && strings.TrimSpace(allSetting.TwoFactorToken) == "" {
 		value, err := s.GetTwoFactorToken()
 		if err != nil {
@@ -1089,7 +974,7 @@ func validateSettingsURLs(allSetting *entity.AllSetting) error {
 
 func (s *SettingService) UpdateSecret(key string, value string) error {
 	switch key {
-	case "ldapPassword", "twoFactorToken":
+	case "twoFactorToken":
 		return s.saveSetting(key, strings.TrimSpace(value))
 	default:
 		return common.NewError("secret key is not replaceable:", key)

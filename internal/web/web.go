@@ -362,17 +362,6 @@ func (s *Server) startTask(restartXray bool) {
 	// Run once a month, midnight, first of month
 	_, _ = s.cron.AddJob("@monthly", job.NewPeriodicTrafficResetJob("monthly"))
 
-	// LDAP sync scheduling
-	if ldapEnabled, _ := s.settingService.GetLdapEnable(); ldapEnabled {
-		runtime, err := s.settingService.GetLdapSyncCron()
-		if err != nil || runtime == "" {
-			runtime = "@every 1m"
-		}
-		j := job.NewLdapSyncJob()
-		// job has zero-value services with method receivers that read settings on demand
-		_, _ = s.cron.AddJob(runtime, j)
-	}
-
 	// CPU monitor publishes cpu.high events; register it whenever any notifier
 	// (Email) wants them.
 	if s.cpuAlarmWanted() {
