@@ -35,7 +35,6 @@ type SubService struct {
 	scheme         string
 	hostWithPort   string
 	remarkTemplate string
-	datepicker     string
 	// subscriptionBody is true only when rendering the actual subscription
 	// content a client app imports (raw /sub fetch, /json, /clash). The remark
 	// template's per-client info is emitted there (on the first link); every
@@ -100,19 +99,6 @@ func (s *SubService) PrepareForRequest(host string) {
 	s.usageShown = map[string]bool{}
 	s.statsByEmail = map[string]xray.ClientTraffic{}
 	s.loadNodes()
-	s.loadRemarkSettings()
-}
-
-// loadRemarkSettings populates the per-request remark formatting state so
-// every subscription format — raw, JSON, Clash — renders remarks the same way
-// (the date formatter reads datepicker). Loading it only in getSubs left
-// JSON/Clash with the zero value.
-func (s *SubService) loadRemarkSettings() {
-	var err error
-	s.datepicker, err = s.settingService.GetDatepicker()
-	if err != nil {
-		s.datepicker = "gregorian"
-	}
 }
 
 func (s *SubService) configuredPublicHost() string {
@@ -2308,28 +2294,26 @@ func searchHost(headers any) string {
 // PageData is a view model for subpage.html
 // PageData contains data for rendering the subscription information page.
 type PageData struct {
-	Host          string
-	BasePath      string
-	SId           string
-	Enabled       bool
-	Download      string
-	Upload        string
-	Total         string
-	Used          string
-	Remained      string
-	Expire        int64
-	LastOnline    int64
-	Datepicker    string
-	DownloadByte  int64
-	UploadByte    int64
-	TotalByte     int64
-	SubUrl        string
-	SubJsonUrl    string
-	SubClashUrl   string
-	SubTitle      string
-	SubSupportUrl string
-	Result        []string
-	Emails        []string
+	Host         string
+	BasePath     string
+	SId          string
+	Enabled      bool
+	Download     string
+	Upload       string
+	Total        string
+	Used         string
+	Remained     string
+	Expire       int64
+	LastOnline   int64
+	DownloadByte int64
+	UploadByte   int64
+	TotalByte    int64
+	SubUrl       string
+	SubJsonUrl   string
+	SubClashUrl  string
+	SubTitle     string
+	Result       []string
+	Emails       []string
 }
 
 // ResolveRequest extracts scheme and host info from request/headers consistently.
@@ -2450,7 +2434,7 @@ func (s *SubService) joinPathWithID(basePath, subId string) string {
 
 // BuildPageData parses header and prepares the template view model.
 // BuildPageData constructs page data for rendering the subscription information page.
-func (s *SubService) BuildPageData(subId string, hostHeader string, traffic xray.ClientTraffic, lastOnline int64, subs []string, emails []string, subURL, subJsonURL, subClashURL string, basePath string, subTitle string, subSupportUrl string) PageData {
+func (s *SubService) BuildPageData(subId string, hostHeader string, traffic xray.ClientTraffic, lastOnline int64, subs []string, emails []string, subURL, subJsonURL, subClashURL string, basePath string, subTitle string) PageData {
 	download := common.FormatTraffic(traffic.Down)
 	upload := common.FormatTraffic(traffic.Up)
 	total := "∞"
@@ -2460,11 +2444,6 @@ func (s *SubService) BuildPageData(subId string, hostHeader string, traffic xray
 		total = common.FormatTraffic(traffic.Total)
 		left := max(traffic.Total-(traffic.Up+traffic.Down), 0)
 		remained = common.FormatTraffic(left)
-	}
-
-	datepicker := s.datepicker
-	if datepicker == "" {
-		datepicker = "gregorian"
 	}
 
 	pageLinks := make([]string, 0, len(subs))
@@ -2481,28 +2460,26 @@ func (s *SubService) BuildPageData(subId string, hostHeader string, traffic xray
 	}
 
 	return PageData{
-		Host:          hostHeader,
-		BasePath:      basePath,
-		SId:           subId,
-		Enabled:       traffic.Enable,
-		Download:      download,
-		Upload:        upload,
-		Total:         total,
-		Used:          used,
-		Remained:      remained,
-		Expire:        traffic.ExpiryTime / 1000,
-		LastOnline:    lastOnline,
-		Datepicker:    datepicker,
-		DownloadByte:  traffic.Down,
-		UploadByte:    traffic.Up,
-		TotalByte:     traffic.Total,
-		SubUrl:        subURL,
-		SubJsonUrl:    subJsonURL,
-		SubClashUrl:   subClashURL,
-		SubTitle:      subTitle,
-		SubSupportUrl: subSupportUrl,
-		Result:        pageLinks,
-		Emails:        pageEmails,
+		Host:         hostHeader,
+		BasePath:     basePath,
+		SId:          subId,
+		Enabled:      traffic.Enable,
+		Download:     download,
+		Upload:       upload,
+		Total:        total,
+		Used:         used,
+		Remained:     remained,
+		Expire:       traffic.ExpiryTime / 1000,
+		LastOnline:   lastOnline,
+		DownloadByte: traffic.Down,
+		UploadByte:   traffic.Up,
+		TotalByte:    traffic.Total,
+		SubUrl:       subURL,
+		SubJsonUrl:   subJsonURL,
+		SubClashUrl:  subClashURL,
+		SubTitle:     subTitle,
+		Result:       pageLinks,
+		Emails:       pageEmails,
 	}
 }
 

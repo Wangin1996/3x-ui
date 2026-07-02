@@ -10,7 +10,6 @@ import {
 import {
   BellOutlined,
   ClockCircleOutlined,
-  GlobalOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
@@ -30,11 +29,6 @@ interface GeneralTabProps {
   allSetting: AllSetting;
   updateSetting: (patch: Partial<AllSetting>) => void;
 }
-
-const DATEPICKER_LIST: { name: string; value: 'gregorian' | 'jalalian' }[] = [
-  { name: 'Gregorian (Standard)', value: 'gregorian' },
-  { name: 'Jalalian (شمسی)', value: 'jalalian' },
-];
 
 export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProps) {
   const { t } = useTranslation();
@@ -225,39 +219,12 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
         ),
       },
       {
-        key: '4',
-        label: catTabLabel(<GlobalOutlined />, t('pages.settings.externalTraffic'), isMobile),
-        children: (
-          <>
-            <SettingListItem paddings="small" title={t('pages.settings.externalTrafficInformEnable')} description={t('pages.settings.externalTrafficInformEnableDesc')}>
-              <Switch checked={allSetting.externalTrafficInformEnable}
-                onChange={(v) => updateSetting({ externalTrafficInformEnable: v })} />
-            </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.externalTrafficInformURI')} description={t('pages.settings.externalTrafficInformURIDesc')}>
-              <Input
-                value={allSetting.externalTrafficInformURI}
-                placeholder="(http|https)://domain[:port]/path/"
-                onChange={(e) => updateSetting({ externalTrafficInformURI: e.target.value })}
-              />
-            </SettingListItem>
-          </>
-        ),
-      },
-      {
         key: '5',
         label: catTabLabel(<ClockCircleOutlined />, t('pages.settings.dateAndTime'), isMobile),
         children: (
           <>
             <SettingListItem paddings="small" title={t('pages.settings.timeZone')} description={t('pages.settings.timeZoneDesc')}>
               <Input value={allSetting.timeLocation} onChange={(e) => updateSetting({ timeLocation: e.target.value })} />
-            </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.datepicker')} description={t('pages.settings.datepickerDescription')}>
-              <Select
-                value={allSetting.datepicker || 'gregorian'}
-                onChange={(v) => updateSetting({ datepicker: v as 'gregorian' | 'jalalian' })}
-                style={{ width: '100%' }}
-                options={DATEPICKER_LIST.map((d) => ({ value: d.value, label: d.name }))}
-              />
             </SettingListItem>
           </>
         ),

@@ -14,7 +14,6 @@ export class AllSetting {
   expireDiff = 0;
   trafficDiff = 0;
   remarkTemplate = '{{INBOUND}}-{{EMAIL}}|📊{{TRAFFIC_LEFT}}|⏳{{DAYS_LEFT}}D';
-  datepicker: 'gregorian' | 'jalalian' = 'gregorian';
   tgLang = 'en-US';
   twoFactorEnable = false;
   twoFactorToken = '';
@@ -22,19 +21,10 @@ export class AllSetting {
   subEnable = true;
   subJsonEnable = false;
   subTitle = '';
-  subSupportUrl = '';
-  subProfileUrl = '';
-  subAnnounce = '';
-  subEnableRouting = false;
-  subRoutingRules = '';
-  subIncyEnableRouting = false;
-  subIncyRoutingRules = '';
   subPath = '/sub/';
   subJsonPath = '/json/';
   subClashEnable = false;
   subClashPath = '/clash/';
-  externalTrafficInformEnable = false;
-  externalTrafficInformURI = '';
   restartXrayOnClientDisable = true;
   subUpdates = 12;
   subEncrypt = true;
@@ -47,8 +37,6 @@ export class AllSetting {
   subJsonMux = '';
   subJsonRules = '';
   subJsonFinalMask = '';
-  subThemeDir = '';
-  subHideSettings = false;
 
   timeLocation = 'Local';
 

@@ -6,10 +6,7 @@ export type SubLinkProvider = unknown;
 export type transportBits = number;
 
 export interface AllSetting {
-  datepicker: string;
   expireDiff: number;
-  externalTrafficInformEnable: boolean;
-  externalTrafficInformURI: string;
   pageSize: number;
   panelOutbound: string;
   remarkTemplate: string;
@@ -25,7 +22,6 @@ export interface AllSetting {
   smtpPort: number;
   smtpTo: string;
   smtpUsername: string;
-  subAnnounce: string;
   subClashEnable: boolean;
   subClashEnableRouting: boolean;
   subClashPath: string;
@@ -33,11 +29,7 @@ export interface AllSetting {
   subClashTemplate: string;
   subClashURI: string;
   subEnable: boolean;
-  subEnableRouting: boolean;
   subEncrypt: boolean;
-  subHideSettings: boolean;
-  subIncyEnableRouting: boolean;
-  subIncyRoutingRules: string;
   subJsonEnable: boolean;
   subJsonFinalMask: string;
   subJsonMux: string;
@@ -45,10 +37,6 @@ export interface AllSetting {
   subJsonRules: string;
   subJsonURI: string;
   subPath: string;
-  subProfileUrl: string;
-  subRoutingRules: string;
-  subSupportUrl: string;
-  subThemeDir: string;
   subTitle: string;
   subURI: string;
   subUpdates: number;
@@ -68,10 +56,7 @@ export interface AllSetting {
 }
 
 export interface AllSettingView {
-  datepicker: string;
   expireDiff: number;
-  externalTrafficInformEnable: boolean;
-  externalTrafficInformURI: string;
   hasApiToken: boolean;
   hasNordSecret: boolean;
   hasSmtpPassword: boolean;
@@ -92,7 +77,6 @@ export interface AllSettingView {
   smtpPort: number;
   smtpTo: string;
   smtpUsername: string;
-  subAnnounce: string;
   subClashEnable: boolean;
   subClashEnableRouting: boolean;
   subClashPath: string;
@@ -100,11 +84,7 @@ export interface AllSettingView {
   subClashTemplate: string;
   subClashURI: string;
   subEnable: boolean;
-  subEnableRouting: boolean;
   subEncrypt: boolean;
-  subHideSettings: boolean;
-  subIncyEnableRouting: boolean;
-  subIncyRoutingRules: string;
   subJsonEnable: boolean;
   subJsonFinalMask: string;
   subJsonMux: string;
@@ -112,10 +92,6 @@ export interface AllSettingView {
   subJsonRules: string;
   subJsonURI: string;
   subPath: string;
-  subProfileUrl: string;
-  subRoutingRules: string;
-  subSupportUrl: string;
-  subThemeDir: string;
   subTitle: string;
   subURI: string;
   subUpdates: number;

@@ -98,38 +98,6 @@ func BuildEngine(ss *service.SettingService) (*gin.Engine, error) {
 	if err != nil {
 		SubTitle = ""
 	}
-	SubSupportUrl, err := ss.GetSubSupportUrl()
-	if err != nil {
-		SubSupportUrl = ""
-	}
-	SubProfileUrl, err := ss.GetSubProfileUrl()
-	if err != nil {
-		SubProfileUrl = ""
-	}
-	SubAnnounce, err := ss.GetSubAnnounce()
-	if err != nil {
-		SubAnnounce = ""
-	}
-	SubEnableRouting, err := ss.GetSubEnableRouting()
-	if err != nil {
-		return nil, err
-	}
-	SubRoutingRules, err := ss.GetSubRoutingRules()
-	if err != nil {
-		SubRoutingRules = ""
-	}
-	SubHideSettings, err := ss.GetSubHideSettings()
-	if err != nil {
-		SubHideSettings = false
-	}
-	SubIncyEnableRouting, err := ss.GetSubIncyEnableRouting()
-	if err != nil {
-		SubIncyEnableRouting = false
-	}
-	SubIncyRoutingRules, err := ss.GetSubIncyRoutingRules()
-	if err != nil {
-		SubIncyRoutingRules = ""
-	}
 
 	engine.Use(locale.LocalizerMiddleware())
 
@@ -175,8 +143,7 @@ func BuildEngine(ss *service.SettingService) (*gin.Engine, error) {
 	NewSUBController(
 		g, LinksPath, JsonPath, ClashPath, subJsonEnable, subClashEnable, Encrypt, RemarkTemplate, SubUpdates,
 		SubJsonMux, SubJsonRules, SubJsonFinalMask, SubClashEnableRouting, SubClashRules, SubClashTemplate,
-		SubTitle, SubSupportUrl, SubProfileUrl, SubAnnounce, SubEnableRouting, SubRoutingRules, SubHideSettings,
-		SubIncyEnableRouting, SubIncyRoutingRules,
+		SubTitle,
 	)
 
 	return engine, nil

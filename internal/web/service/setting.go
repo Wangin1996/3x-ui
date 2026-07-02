@@ -46,59 +46,47 @@ var defaultValueMap = map[string]string{
 	// cert are minted lazily on first use, and the node-side trust CA is pasted
 	// in by the operator. Kept out of entity.AllSetting so private keys never
 	// reach the settings UI/export.
-	"nodeMtlsCaCertPem":           "",
-	"nodeMtlsCaKeyPem":            "",
-	"nodeMtlsClientCertPem":       "",
-	"nodeMtlsClientKeyPem":        "",
-	"nodeMtlsClientCAPem":         "",
-	"webBasePath":                 normalizeBasePath(getEnv("XUI_INIT_WEB_BASE_PATH", "/")),
-	"sessionMaxAge":               "360",
-	"trustedProxyCIDRs":           "127.0.0.1/32,::1/128",
-	"pageSize":                    "25",
-	"expireDiff":                  "0",
-	"trafficDiff":                 "0",
-	"remarkTemplate":              "{{INBOUND}}-{{EMAIL}}|📊{{TRAFFIC_LEFT}}|⏳{{DAYS_LEFT}}D",
-	"timeLocation":                "Local",
-	"tgLang":                      "en-US",
-	"twoFactorEnable":             "false",
-	"twoFactorToken":              "",
-	"subEnable":                   "true",
-	"subJsonEnable":               "false",
-	"subTitle":                    "",
-	"subSupportUrl":               "",
-	"subProfileUrl":               "",
-	"subAnnounce":                 "",
-	"subEnableRouting":            "false",
-	"subRoutingRules":             "",
-	"subHideSettings":             "false",
-	"subIncyEnableRouting":        "false",
-	"subIncyRoutingRules":         "",
-	"subPath":                     "/sub/",
-	"subUpdates":                  "12",
-	"subEncrypt":                  "true",
-	"subURI":                      "",
-	"subJsonPath":                 "/json/",
-	"subJsonURI":                  "",
-	"subClashEnable":              "false",
-	"subClashPath":                "/clash/",
-	"subClashURI":                 "",
-	"subClashEnableRouting":       "false",
-	"subClashRules":               "",
-	"subClashTemplate":            "",
-	"subJsonMux":                  "",
-	"subJsonRules":                "",
-	"subJsonFinalMask":            "",
-	"subThemeDir":                 "",
-	"datepicker":                  "gregorian",
-	"warp":                        "",
-	"warpUpdateInterval":          "0",
-	"nord":                        "",
-	"externalTrafficInformEnable": "false",
-	"externalTrafficInformURI":    "",
-	"restartXrayOnClientDisable":  "true",
-	"xrayOutboundTestUrl":         "https://www.google.com/generate_204",
-	"panelOutbound":               "",
-	"devChannelEnable":            "false",
+	"nodeMtlsCaCertPem":          "",
+	"nodeMtlsCaKeyPem":           "",
+	"nodeMtlsClientCertPem":      "",
+	"nodeMtlsClientKeyPem":       "",
+	"nodeMtlsClientCAPem":        "",
+	"webBasePath":                normalizeBasePath(getEnv("XUI_INIT_WEB_BASE_PATH", "/")),
+	"sessionMaxAge":              "360",
+	"trustedProxyCIDRs":          "127.0.0.1/32,::1/128",
+	"pageSize":                   "25",
+	"expireDiff":                 "0",
+	"trafficDiff":                "0",
+	"remarkTemplate":             "{{INBOUND}}-{{EMAIL}}|📊{{TRAFFIC_LEFT}}|⏳{{DAYS_LEFT}}D",
+	"timeLocation":               "Local",
+	"tgLang":                     "en-US",
+	"twoFactorEnable":            "false",
+	"twoFactorToken":             "",
+	"subEnable":                  "true",
+	"subJsonEnable":              "false",
+	"subTitle":                   "",
+	"subPath":                    "/sub/",
+	"subUpdates":                 "12",
+	"subEncrypt":                 "true",
+	"subURI":                     "",
+	"subJsonPath":                "/json/",
+	"subJsonURI":                 "",
+	"subClashEnable":             "false",
+	"subClashPath":               "/clash/",
+	"subClashURI":                "",
+	"subClashEnableRouting":      "false",
+	"subClashRules":              "",
+	"subClashTemplate":           "",
+	"subJsonMux":                 "",
+	"subJsonRules":               "",
+	"subJsonFinalMask":           "",
+	"warp":                       "",
+	"warpUpdateInterval":         "0",
+	"nord":                       "",
+	"restartXrayOnClientDisable": "true",
+	"xrayOutboundTestUrl":        "https://www.google.com/generate_204",
+	"panelOutbound":              "",
+	"devChannelEnable":           "false",
 
 	// LDAP defaults
 
@@ -606,38 +594,6 @@ func (s *SettingService) GetSubTitle() (string, error) {
 	return s.getString("subTitle")
 }
 
-func (s *SettingService) GetSubSupportUrl() (string, error) {
-	return s.getString("subSupportUrl")
-}
-
-func (s *SettingService) GetSubProfileUrl() (string, error) {
-	return s.getString("subProfileUrl")
-}
-
-func (s *SettingService) GetSubAnnounce() (string, error) {
-	return s.getString("subAnnounce")
-}
-
-func (s *SettingService) GetSubEnableRouting() (bool, error) {
-	return s.getBool("subEnableRouting")
-}
-
-func (s *SettingService) GetSubRoutingRules() (string, error) {
-	return s.getString("subRoutingRules")
-}
-
-func (s *SettingService) GetSubHideSettings() (bool, error) {
-	return s.getBool("subHideSettings")
-}
-
-func (s *SettingService) GetSubIncyEnableRouting() (bool, error) {
-	return s.getBool("subIncyEnableRouting")
-}
-
-func (s *SettingService) GetSubIncyRoutingRules() (string, error) {
-	return s.getString("subIncyRoutingRules")
-}
-
 func (s *SettingService) GetSubPath() (string, error) {
 	return s.getString("subPath")
 }
@@ -702,14 +658,6 @@ func (s *SettingService) GetSubJsonFinalMask() (string, error) {
 	return s.getString("subJsonFinalMask")
 }
 
-func (s *SettingService) GetSubThemeDir() (string, error) {
-	return s.getString("subThemeDir")
-}
-
-func (s *SettingService) GetDatepicker() (string, error) {
-	return s.getString("datepicker")
-}
-
 func (s *SettingService) GetWarp() (string, error) {
 	return s.getString("warp")
 }
@@ -724,22 +672,6 @@ func (s *SettingService) GetNord() (string, error) {
 
 func (s *SettingService) SetNord(data string) error {
 	return s.setString("nord", data)
-}
-
-func (s *SettingService) GetExternalTrafficInformEnable() (bool, error) {
-	return s.getBool("externalTrafficInformEnable")
-}
-
-func (s *SettingService) SetExternalTrafficInformEnable(value bool) error {
-	return s.setBool("externalTrafficInformEnable", value)
-}
-
-func (s *SettingService) GetExternalTrafficInformURI() (string, error) {
-	return s.getString("externalTrafficInformURI")
-}
-
-func (s *SettingService) SetExternalTrafficInformURI(InformURI string) error {
-	return s.setString("externalTrafficInformURI", InformURI)
 }
 
 func (s *SettingService) GetRestartXrayOnClientDisable() (bool, error) {
@@ -867,9 +799,6 @@ func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting) error {
 	if err := s.preserveRedactedSecrets(allSetting); err != nil {
 		return err
 	}
-	if err := validateSettingsURLs(allSetting); err != nil {
-		return err
-	}
 	if err := allSetting.CheckValid(); err != nil {
 		return err
 	}
@@ -924,17 +853,6 @@ func (s *SettingService) preserveRedactedSecrets(allSetting *entity.AllSetting) 
 			return err
 		}
 		allSetting.SmtpPassword = value
-	}
-	return nil
-}
-
-func validateSettingsURLs(allSetting *entity.AllSetting) error {
-	if allSetting.ExternalTrafficInformURI != "" {
-		u, err := SanitizeHTTPURL(allSetting.ExternalTrafficInformURI)
-		if err != nil {
-			return common.NewError("external traffic inform URI is invalid:", err)
-		}
-		allSetting.ExternalTrafficInformURI = u
 	}
 	return nil
 }
@@ -1013,7 +931,6 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		"pageSize":         func() (any, error) { return s.GetPageSize() },
 		"defaultCert":      func() (any, error) { return s.GetCertFile() },
 		"defaultKey":       func() (any, error) { return s.GetKeyFile() },
-		"subThemeDir":      func() (any, error) { return s.GetSubThemeDir() },
 		"subEnable":        func() (any, error) { return s.GetSubEnable() },
 		"subJsonEnable":    func() (any, error) { return s.GetSubJsonEnable() },
 		"subClashEnable":   func() (any, error) { return s.GetSubClashEnable() },
@@ -1021,7 +938,6 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		"subURI":           func() (any, error) { return s.GetSubURI() },
 		"subJsonURI":       func() (any, error) { return s.GetSubJsonURI() },
 		"subClashURI":      func() (any, error) { return s.GetSubClashURI() },
-		"datepicker":       func() (any, error) { return s.GetDatepicker() },
 		"ipLimitEnable":    func() (any, error) { return s.GetIpLimitEnable() },
 		"accessLogEnable":  func() (any, error) { return s.GetAccessLogEnable() },
 		"webDomain":        func() (any, error) { return s.GetWebDomain() },

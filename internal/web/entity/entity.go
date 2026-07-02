@@ -36,7 +36,6 @@ type AllSetting struct {
 	ExpireDiff     int    `json:"expireDiff" form:"expireDiff" validate:"gte=0"`           // Expiration warning threshold in days
 	TrafficDiff    int    `json:"trafficDiff" form:"trafficDiff" validate:"gte=0,lte=100"` // Traffic warning threshold percentage
 	RemarkTemplate string `json:"remarkTemplate" form:"remarkTemplate"`                    // Subscription remark template ({{VAR}} tokens) rendered per client
-	Datepicker     string `json:"datepicker" form:"datepicker"`                            // Date picker format
 
 	// Telegram bot settings
 	TgLang string `json:"tgLang" form:"tgLang"` // Backend/subscription-page language
@@ -59,36 +58,25 @@ type AllSetting struct {
 	TwoFactorToken  string `json:"twoFactorToken" form:"twoFactorToken"`   // Two-factor authentication token
 
 	// Subscription server settings
-	SubEnable                   bool   `json:"subEnable" form:"subEnable"`                                     // Enable subscription server
-	SubJsonEnable               bool   `json:"subJsonEnable" form:"subJsonEnable"`                             // Enable JSON subscription endpoint
-	SubTitle                    string `json:"subTitle" form:"subTitle"`                                       // Subscription title
-	SubSupportUrl               string `json:"subSupportUrl" form:"subSupportUrl"`                             // Subscription support URL
-	SubProfileUrl               string `json:"subProfileUrl" form:"subProfileUrl"`                             // Subscription profile URL
-	SubAnnounce                 string `json:"subAnnounce" form:"subAnnounce"`                                 // Subscription announce
-	SubEnableRouting            bool   `json:"subEnableRouting" form:"subEnableRouting"`                       // Enable routing for subscription
-	SubRoutingRules             string `json:"subRoutingRules" form:"subRoutingRules"`                         // Subscription global routing rules (Only for Happ)
-	SubIncyEnableRouting        bool   `json:"subIncyEnableRouting" form:"subIncyEnableRouting"`               // Enable routing injection for the Incy client
-	SubIncyRoutingRules         string `json:"subIncyRoutingRules" form:"subIncyRoutingRules"`                 // Incy routing deep-link injected into the subscription body (Only for Incy)
-	SubPath                     string `json:"subPath" form:"subPath"`                                         // Base path for subscription URLs
-	SubUpdates                  int    `json:"subUpdates" form:"subUpdates" validate:"gte=0,lte=525600"`       // Subscription update interval in minutes
-	ExternalTrafficInformEnable bool   `json:"externalTrafficInformEnable" form:"externalTrafficInformEnable"` // Enable external traffic reporting
-	ExternalTrafficInformURI    string `json:"externalTrafficInformURI" form:"externalTrafficInformURI"`       // URI for external traffic reporting
-	RestartXrayOnClientDisable  bool   `json:"restartXrayOnClientDisable" form:"restartXrayOnClientDisable"`   // Restart Xray when clients are auto-disabled by expiry/traffic limit
-	SubEncrypt                  bool   `json:"subEncrypt" form:"subEncrypt"`                                   // Encrypt subscription responses
-	SubURI                      string `json:"subURI" form:"subURI"`                                           // Subscription server URI
-	SubJsonPath                 string `json:"subJsonPath" form:"subJsonPath"`                                 // Path for JSON subscription endpoint
-	SubJsonURI                  string `json:"subJsonURI" form:"subJsonURI"`                                   // JSON subscription server URI
-	SubClashEnable              bool   `json:"subClashEnable" form:"subClashEnable"`                           // Enable Clash/Mihomo subscription endpoint
-	SubClashPath                string `json:"subClashPath" form:"subClashPath"`                               // Path for Clash/Mihomo subscription endpoint
-	SubClashURI                 string `json:"subClashURI" form:"subClashURI"`                                 // Clash/Mihomo subscription server URI
-	SubClashEnableRouting       bool   `json:"subClashEnableRouting" form:"subClashEnableRouting"`             // Enable global routing rules for Clash/Mihomo
-	SubClashRules               string `json:"subClashRules" form:"subClashRules"`                             // Clash/Mihomo global routing rules
-	SubClashTemplate            string `json:"subClashTemplate" form:"subClashTemplate"`                       // Full Clash template; nodes injected into it when set
-	SubJsonMux                  string `json:"subJsonMux" form:"subJsonMux"`                                   // JSON subscription mux configuration
-	SubJsonRules                string `json:"subJsonRules" form:"subJsonRules"`
-	SubJsonFinalMask            string `json:"subJsonFinalMask" form:"subJsonFinalMask"` // JSON subscription global finalmask (tcp/udp masks + quicParams)
-	SubThemeDir                 string `json:"subThemeDir" form:"subThemeDir"`           // Absolute path to a folder containing a custom subscription page template
-	SubHideSettings             bool   `json:"subHideSettings" form:"subHideSettings"`   // Hide server settings in happ subscription (Only for Happ)
+	SubEnable                  bool   `json:"subEnable" form:"subEnable"`                                   // Enable subscription server
+	SubJsonEnable              bool   `json:"subJsonEnable" form:"subJsonEnable"`                           // Enable JSON subscription endpoint
+	SubTitle                   string `json:"subTitle" form:"subTitle"`                                     // Subscription title
+	SubPath                    string `json:"subPath" form:"subPath"`                                       // Base path for subscription URLs
+	SubUpdates                 int    `json:"subUpdates" form:"subUpdates" validate:"gte=0,lte=525600"`     // Subscription update interval in minutes
+	RestartXrayOnClientDisable bool   `json:"restartXrayOnClientDisable" form:"restartXrayOnClientDisable"` // Restart Xray when clients are auto-disabled by expiry/traffic limit
+	SubEncrypt                 bool   `json:"subEncrypt" form:"subEncrypt"`                                 // Encrypt subscription responses
+	SubURI                     string `json:"subURI" form:"subURI"`                                         // Subscription server URI
+	SubJsonPath                string `json:"subJsonPath" form:"subJsonPath"`                               // Path for JSON subscription endpoint
+	SubJsonURI                 string `json:"subJsonURI" form:"subJsonURI"`                                 // JSON subscription server URI
+	SubClashEnable             bool   `json:"subClashEnable" form:"subClashEnable"`                         // Enable Clash/Mihomo subscription endpoint
+	SubClashPath               string `json:"subClashPath" form:"subClashPath"`                             // Path for Clash/Mihomo subscription endpoint
+	SubClashURI                string `json:"subClashURI" form:"subClashURI"`                               // Clash/Mihomo subscription server URI
+	SubClashEnableRouting      bool   `json:"subClashEnableRouting" form:"subClashEnableRouting"`           // Enable global routing rules for Clash/Mihomo
+	SubClashRules              string `json:"subClashRules" form:"subClashRules"`                           // Clash/Mihomo global routing rules
+	SubClashTemplate           string `json:"subClashTemplate" form:"subClashTemplate"`                     // Full Clash template; nodes injected into it when set
+	SubJsonMux                 string `json:"subJsonMux" form:"subJsonMux"`                                 // JSON subscription mux configuration
+	SubJsonRules               string `json:"subJsonRules" form:"subJsonRules"`
+	SubJsonFinalMask           string `json:"subJsonFinalMask" form:"subJsonFinalMask"` // JSON subscription global finalmask (tcp/udp masks + quicParams)
 
 	// JSON subscription routing rules
 

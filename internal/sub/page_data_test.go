@@ -20,7 +20,7 @@ func TestBuildPageData_SplitsMultiHostLinks(t *testing.T) {
 	}
 	emails := []string{"john@x", "alice@x"}
 
-	page := s.BuildPageData("s1", "", xray.ClientTraffic{}, 0, subs, emails, "", "", "", "/", "", "")
+	page := s.BuildPageData("s1", "", xray.ClientTraffic{}, 0, subs, emails, "", "", "", "/", "")
 
 	if len(page.Result) != 4 {
 		t.Fatalf("Result len = %d, want 4 (3 host links + 1 single link)", len(page.Result))

@@ -3,22 +3,10 @@ export const SCHEMAS: Record<string, unknown> = {
   "AllSetting": {
     "description": "AllSetting contains all configuration settings for the 3x-ui panel including web server, Telegram bot, and subscription settings.",
     "properties": {
-      "datepicker": {
-        "description": "Date picker format",
-        "type": "string"
-      },
       "expireDiff": {
         "description": "Expiration warning threshold in days",
         "minimum": 0,
         "type": "integer"
-      },
-      "externalTrafficInformEnable": {
-        "description": "Enable external traffic reporting",
-        "type": "boolean"
-      },
-      "externalTrafficInformURI": {
-        "description": "URI for external traffic reporting",
-        "type": "string"
       },
       "pageSize": {
         "description": "UI settings\nNumber of items per page in lists (0 disables pagination)",
@@ -90,10 +78,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "SMTP username",
         "type": "string"
       },
-      "subAnnounce": {
-        "description": "Subscription announce",
-        "type": "string"
-      },
       "subClashEnable": {
         "description": "Enable Clash/Mihomo subscription endpoint",
         "type": "boolean"
@@ -122,25 +106,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "Subscription server settings\nEnable subscription server",
         "type": "boolean"
       },
-      "subEnableRouting": {
-        "description": "Enable routing for subscription",
-        "type": "boolean"
-      },
       "subEncrypt": {
         "description": "Encrypt subscription responses",
         "type": "boolean"
-      },
-      "subHideSettings": {
-        "description": "Hide server settings in happ subscription (Only for Happ)",
-        "type": "boolean"
-      },
-      "subIncyEnableRouting": {
-        "description": "Enable routing injection for the Incy client",
-        "type": "boolean"
-      },
-      "subIncyRoutingRules": {
-        "description": "Incy routing deep-link injected into the subscription body (Only for Incy)",
-        "type": "string"
       },
       "subJsonEnable": {
         "description": "Enable JSON subscription endpoint",
@@ -167,22 +135,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "subPath": {
         "description": "Base path for subscription URLs",
-        "type": "string"
-      },
-      "subProfileUrl": {
-        "description": "Subscription profile URL",
-        "type": "string"
-      },
-      "subRoutingRules": {
-        "description": "Subscription global routing rules (Only for Happ)",
-        "type": "string"
-      },
-      "subSupportUrl": {
-        "description": "Subscription support URL",
-        "type": "string"
-      },
-      "subThemeDir": {
-        "description": "Absolute path to a folder containing a custom subscription page template",
         "type": "string"
       },
       "subTitle": {
@@ -258,10 +210,7 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
-      "datepicker",
       "expireDiff",
-      "externalTrafficInformEnable",
-      "externalTrafficInformURI",
       "pageSize",
       "panelOutbound",
       "remarkTemplate",
@@ -277,7 +226,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "smtpPort",
       "smtpTo",
       "smtpUsername",
-      "subAnnounce",
       "subClashEnable",
       "subClashEnableRouting",
       "subClashPath",
@@ -285,11 +233,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subClashTemplate",
       "subClashURI",
       "subEnable",
-      "subEnableRouting",
       "subEncrypt",
-      "subHideSettings",
-      "subIncyEnableRouting",
-      "subIncyRoutingRules",
       "subJsonEnable",
       "subJsonFinalMask",
       "subJsonMux",
@@ -297,10 +241,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonRules",
       "subJsonURI",
       "subPath",
-      "subProfileUrl",
-      "subRoutingRules",
-      "subSupportUrl",
-      "subThemeDir",
       "subTitle",
       "subURI",
       "subUpdates",
@@ -323,22 +263,10 @@ export const SCHEMAS: Record<string, unknown> = {
   "AllSettingView": {
     "description": "AllSettingView is the browser-safe settings read model. Secret values\nare redacted from the embedded write model and represented by presence\nflags so the UI can show configured/not configured state.",
     "properties": {
-      "datepicker": {
-        "description": "Date picker format",
-        "type": "string"
-      },
       "expireDiff": {
         "description": "Expiration warning threshold in days",
         "minimum": 0,
         "type": "integer"
-      },
-      "externalTrafficInformEnable": {
-        "description": "Enable external traffic reporting",
-        "type": "boolean"
-      },
-      "externalTrafficInformURI": {
-        "description": "URI for external traffic reporting",
-        "type": "string"
       },
       "hasApiToken": {
         "type": "boolean"
@@ -425,10 +353,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "SMTP username",
         "type": "string"
       },
-      "subAnnounce": {
-        "description": "Subscription announce",
-        "type": "string"
-      },
       "subClashEnable": {
         "description": "Enable Clash/Mihomo subscription endpoint",
         "type": "boolean"
@@ -457,25 +381,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "Subscription server settings\nEnable subscription server",
         "type": "boolean"
       },
-      "subEnableRouting": {
-        "description": "Enable routing for subscription",
-        "type": "boolean"
-      },
       "subEncrypt": {
         "description": "Encrypt subscription responses",
         "type": "boolean"
-      },
-      "subHideSettings": {
-        "description": "Hide server settings in happ subscription (Only for Happ)",
-        "type": "boolean"
-      },
-      "subIncyEnableRouting": {
-        "description": "Enable routing injection for the Incy client",
-        "type": "boolean"
-      },
-      "subIncyRoutingRules": {
-        "description": "Incy routing deep-link injected into the subscription body (Only for Incy)",
-        "type": "string"
       },
       "subJsonEnable": {
         "description": "Enable JSON subscription endpoint",
@@ -502,22 +410,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "subPath": {
         "description": "Base path for subscription URLs",
-        "type": "string"
-      },
-      "subProfileUrl": {
-        "description": "Subscription profile URL",
-        "type": "string"
-      },
-      "subRoutingRules": {
-        "description": "Subscription global routing rules (Only for Happ)",
-        "type": "string"
-      },
-      "subSupportUrl": {
-        "description": "Subscription support URL",
-        "type": "string"
-      },
-      "subThemeDir": {
-        "description": "Absolute path to a folder containing a custom subscription page template",
         "type": "string"
       },
       "subTitle": {
@@ -593,10 +485,7 @@ export const SCHEMAS: Record<string, unknown> = {
       }
     },
     "required": [
-      "datepicker",
       "expireDiff",
-      "externalTrafficInformEnable",
-      "externalTrafficInformURI",
       "hasApiToken",
       "hasNordSecret",
       "hasSmtpPassword",
@@ -617,7 +506,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "smtpPort",
       "smtpTo",
       "smtpUsername",
-      "subAnnounce",
       "subClashEnable",
       "subClashEnableRouting",
       "subClashPath",
@@ -625,11 +513,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subClashTemplate",
       "subClashURI",
       "subEnable",
-      "subEnableRouting",
       "subEncrypt",
-      "subHideSettings",
-      "subIncyEnableRouting",
-      "subIncyRoutingRules",
       "subJsonEnable",
       "subJsonFinalMask",
       "subJsonMux",
@@ -637,10 +521,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonRules",
       "subJsonURI",
       "subPath",
-      "subProfileUrl",
-      "subRoutingRules",
-      "subSupportUrl",
-      "subThemeDir",
       "subTitle",
       "subURI",
       "subUpdates",
