@@ -94,10 +94,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "Subscription announce",
         "type": "string"
       },
-      "subCertFile": {
-        "description": "SSL certificate file for subscription server",
-        "type": "string"
-      },
       "subClashEnable": {
         "description": "Enable Clash/Mihomo subscription endpoint",
         "type": "boolean"
@@ -120,10 +116,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "subClashURI": {
         "description": "Clash/Mihomo subscription server URI",
-        "type": "string"
-      },
-      "subDomain": {
-        "description": "Domain for subscription server validation",
         "type": "string"
       },
       "subEnable": {
@@ -173,23 +165,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "JSON subscription server URI",
         "type": "string"
       },
-      "subKeyFile": {
-        "description": "SSL private key file for subscription server",
-        "type": "string"
-      },
-      "subListen": {
-        "description": "Subscription server listen IP",
-        "type": "string"
-      },
       "subPath": {
         "description": "Base path for subscription URLs",
         "type": "string"
-      },
-      "subPort": {
-        "description": "Subscription server port",
-        "maximum": 65535,
-        "minimum": 1,
-        "type": "integer"
       },
       "subProfileUrl": {
         "description": "Subscription profile URL",
@@ -300,14 +278,12 @@ export const SCHEMAS: Record<string, unknown> = {
       "smtpTo",
       "smtpUsername",
       "subAnnounce",
-      "subCertFile",
       "subClashEnable",
       "subClashEnableRouting",
       "subClashPath",
       "subClashRules",
       "subClashTemplate",
       "subClashURI",
-      "subDomain",
       "subEnable",
       "subEnableRouting",
       "subEncrypt",
@@ -320,10 +296,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonPath",
       "subJsonRules",
       "subJsonURI",
-      "subKeyFile",
-      "subListen",
       "subPath",
-      "subPort",
       "subProfileUrl",
       "subRoutingRules",
       "subSupportUrl",
@@ -456,10 +429,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "Subscription announce",
         "type": "string"
       },
-      "subCertFile": {
-        "description": "SSL certificate file for subscription server",
-        "type": "string"
-      },
       "subClashEnable": {
         "description": "Enable Clash/Mihomo subscription endpoint",
         "type": "boolean"
@@ -482,10 +451,6 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "subClashURI": {
         "description": "Clash/Mihomo subscription server URI",
-        "type": "string"
-      },
-      "subDomain": {
-        "description": "Domain for subscription server validation",
         "type": "string"
       },
       "subEnable": {
@@ -535,23 +500,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "JSON subscription server URI",
         "type": "string"
       },
-      "subKeyFile": {
-        "description": "SSL private key file for subscription server",
-        "type": "string"
-      },
-      "subListen": {
-        "description": "Subscription server listen IP",
-        "type": "string"
-      },
       "subPath": {
         "description": "Base path for subscription URLs",
         "type": "string"
-      },
-      "subPort": {
-        "description": "Subscription server port",
-        "maximum": 65535,
-        "minimum": 1,
-        "type": "integer"
       },
       "subProfileUrl": {
         "description": "Subscription profile URL",
@@ -667,14 +618,12 @@ export const SCHEMAS: Record<string, unknown> = {
       "smtpTo",
       "smtpUsername",
       "subAnnounce",
-      "subCertFile",
       "subClashEnable",
       "subClashEnableRouting",
       "subClashPath",
       "subClashRules",
       "subClashTemplate",
       "subClashURI",
-      "subDomain",
       "subEnable",
       "subEnableRouting",
       "subEncrypt",
@@ -687,10 +636,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subJsonPath",
       "subJsonRules",
       "subJsonURI",
-      "subKeyFile",
-      "subListen",
       "subPath",
-      "subPort",
       "subProfileUrl",
       "subRoutingRules",
       "subSupportUrl",

@@ -73,12 +73,7 @@ var defaultValueMap = map[string]string{
 	"subHideSettings":             "false",
 	"subIncyEnableRouting":        "false",
 	"subIncyRoutingRules":         "",
-	"subListen":                   "",
-	"subPort":                     "2096",
 	"subPath":                     "/sub/",
-	"subDomain":                   "",
-	"subCertFile":                 "",
-	"subKeyFile":                  "",
 	"subUpdates":                  "12",
 	"subEncrypt":                  "true",
 	"subURI":                      "",
@@ -643,40 +638,12 @@ func (s *SettingService) GetSubIncyRoutingRules() (string, error) {
 	return s.getString("subIncyRoutingRules")
 }
 
-func (s *SettingService) GetSubListen() (string, error) {
-	return s.getString("subListen")
-}
-
-func (s *SettingService) GetSubPort() (int, error) {
-	return s.getInt("subPort")
-}
-
 func (s *SettingService) GetSubPath() (string, error) {
 	return s.getString("subPath")
 }
 
 func (s *SettingService) GetSubJsonPath() (string, error) {
 	return s.getString("subJsonPath")
-}
-
-func (s *SettingService) GetSubDomain() (string, error) {
-	return s.getString("subDomain")
-}
-
-func (s *SettingService) SetSubCertFile(subCertFile string) error {
-	return s.setString("subCertFile", subCertFile)
-}
-
-func (s *SettingService) GetSubCertFile() (string, error) {
-	return s.getString("subCertFile")
-}
-
-func (s *SettingService) SetSubKeyFile(subKeyFile string) error {
-	return s.setString("subKeyFile", subKeyFile)
-}
-
-func (s *SettingService) GetSubKeyFile() (string, error) {
-	return s.getString("subKeyFile")
 }
 
 func (s *SettingService) GetSubUpdates() (string, error) {
@@ -1058,7 +1025,6 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		"ipLimitEnable":    func() (any, error) { return s.GetIpLimitEnable() },
 		"accessLogEnable":  func() (any, error) { return s.GetAccessLogEnable() },
 		"webDomain":        func() (any, error) { return s.GetWebDomain() },
-		"subDomain":        func() (any, error) { return s.GetSubDomain() },
 		"devChannelEnable": func() (any, error) { return s.GetDevChannelEnable() },
 		"isDevBuild":       func() (any, error) { return config.IsDevBuild(), nil },
 	}

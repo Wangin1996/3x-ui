@@ -69,12 +69,7 @@ type AllSetting struct {
 	SubRoutingRules             string `json:"subRoutingRules" form:"subRoutingRules"`                         // Subscription global routing rules (Only for Happ)
 	SubIncyEnableRouting        bool   `json:"subIncyEnableRouting" form:"subIncyEnableRouting"`               // Enable routing injection for the Incy client
 	SubIncyRoutingRules         string `json:"subIncyRoutingRules" form:"subIncyRoutingRules"`                 // Incy routing deep-link injected into the subscription body (Only for Incy)
-	SubListen                   string `json:"subListen" form:"subListen"`                                     // Subscription server listen IP
-	SubPort                     int    `json:"subPort" form:"subPort" validate:"gte=1,lte=65535"`              // Subscription server port
 	SubPath                     string `json:"subPath" form:"subPath"`                                         // Base path for subscription URLs
-	SubDomain                   string `json:"subDomain" form:"subDomain"`                                     // Domain for subscription server validation
-	SubCertFile                 string `json:"subCertFile" form:"subCertFile"`                                 // SSL certificate file for subscription server
-	SubKeyFile                  string `json:"subKeyFile" form:"subKeyFile"`                                   // SSL private key file for subscription server
 	SubUpdates                  int    `json:"subUpdates" form:"subUpdates" validate:"gte=0,lte=525600"`       // Subscription update interval in minutes
 	ExternalTrafficInformEnable bool   `json:"externalTrafficInformEnable" form:"externalTrafficInformEnable"` // Enable external traffic reporting
 	ExternalTrafficInformURI    string `json:"externalTrafficInformURI" form:"externalTrafficInformURI"`       // URI for external traffic reporting
@@ -132,36 +127,14 @@ func (s *AllSetting) CheckValid() error {
 		}
 	}
 
-	if s.SubListen != "" {
-		ip := net.ParseIP(s.SubListen)
-		if ip == nil {
-			return common.NewError("Sub listen is not valid ip:", s.SubListen)
-		}
-	}
-
 	if s.WebPort <= 0 || s.WebPort > math.MaxUint16 {
 		return common.NewError("web port is not a valid port:", s.WebPort)
-	}
-
-	if s.SubPort <= 0 || s.SubPort > math.MaxUint16 {
-		return common.NewError("Sub port is not a valid port:", s.SubPort)
-	}
-
-	if (s.SubPort == s.WebPort) && (s.WebListen == s.SubListen) {
-		return common.NewError("Sub and Web could not use same ip:port, ", s.SubListen, ":", s.SubPort, " & ", s.WebListen, ":", s.WebPort)
 	}
 
 	if s.WebCertFile != "" || s.WebKeyFile != "" {
 		_, err := tls.LoadX509KeyPair(s.WebCertFile, s.WebKeyFile)
 		if err != nil {
 			return common.NewErrorf("cert file <%v> or key file <%v> invalid: %v", s.WebCertFile, s.WebKeyFile, err)
-		}
-	}
-
-	if s.SubCertFile != "" || s.SubKeyFile != "" {
-		_, err := tls.LoadX509KeyPair(s.SubCertFile, s.SubKeyFile)
-		if err != nil {
-			return common.NewErrorf("cert file <%v> or key file <%v> invalid: %v", s.SubCertFile, s.SubKeyFile, err)
 		}
 	}
 
