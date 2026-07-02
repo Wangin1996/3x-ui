@@ -8,6 +8,7 @@ import { markLocalInvalidate } from '@/api/invalidationTracker';
 import {
   ClientHydrateSchema,
   ClientPageResponseSchema,
+  GroupSummaryListSchema,
   InboundOptionsSchema,
   OnlinesSchema,
   BulkAdjustResultSchema,
@@ -223,6 +224,25 @@ export function useClients() {
   const total = listQuery.data?.total ?? 0;
   const filtered = listQuery.data?.filtered ?? 0;
   const allGroups = listQuery.data?.groups ?? [];
+
+  const groupSummaryQuery = useQuery({
+    queryKey: keys.clients.groups(),
+    queryFn: async () => {
+      const msg = await HttpUtil.get('/panel/api/clients/groups', undefined, { silent: true });
+      if (!msg?.success) return [];
+      const validated = parseMsg(msg, GroupSummaryListSchema, 'clients/groups');
+      return validated.obj ?? [];
+    },
+    staleTime: 30_000,
+  });
+  const groupDefaults = useMemo(() => {
+    const map: Record<string, number[]> = {};
+    for (const g of groupSummaryQuery.data ?? []) {
+      if (g.defaultInbounds?.length) map[g.name] = g.defaultInbounds;
+    }
+    return map;
+  }, [groupSummaryQuery.data]);
+
   const fetched = listQuery.data !== undefined || listQuery.isError;
   const fetchError = listQuery.error ? (listQuery.error as Error).message : '';
   const loading = listQuery.isFetching;
@@ -598,6 +618,7 @@ export function useClients() {
     filtered,
     summary,
     allGroups,
+    groupDefaults,
     hydrate,
     query,
     setQuery,

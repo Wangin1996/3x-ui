@@ -157,6 +157,7 @@ export const GroupSummarySchema = z.object({
   trafficUsed: z.number().nullable().transform((v) => v ?? 0),
   up: z.number().nullable().transform((v) => v ?? 0),
   down: z.number().nullable().transform((v) => v ?? 0),
+  defaultInbounds: z.array(z.number()).nullish().transform((v) => v ?? []),
 });
 
 export const GroupSummaryListSchema = z.array(GroupSummarySchema).nullable().transform((v) => v ?? []);
@@ -196,7 +197,7 @@ export const ClientFormSchema = z.object({
 });
 
 export const ClientCreateFormSchema = ClientFormSchema.extend({
-  inboundIds: z.array(z.number()).min(1, 'pages.clients.selectInbound'),
+  inboundIds: z.array(z.number()),
 });
 
 export const ClientBulkAdjustFormSchema = z

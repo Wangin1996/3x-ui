@@ -204,6 +204,7 @@ export default function ClientsPage() {
     clients, total, filtered,
     summary: serverSummary,
     allGroups,
+    groupDefaults,
     setQuery,
     inbounds, onlines, loading, transitioning, fetched, fetchError, subSettings,
     tgBotEnable, expireDiff, trafficDiff, pageSize,
@@ -1452,6 +1453,7 @@ export default function ClientsPage() {
             inbounds={inbounds}
             tgBotEnable={tgBotEnable}
             groups={allGroups}
+            groupDefaults={groupDefaults}
             save={onSave}
             resetTraffic={resetTraffic}
             setLoginPassword={setLoginPassword}

@@ -749,6 +749,7 @@
       "sniffingDestOverride": "目標覆寫"
     },
     "clients": {
+      "attachedInboundsOptional": "可選 —— 留空並選擇分組/套餐可自動掛載,也可稍後再掛。",
       "portalPassword": {
         "button": "登入密碼",
         "title": "設定使用者中心登入密碼",
@@ -963,6 +964,11 @@
       }
     },
     "groups": {
+      "setPlanInbounds": "預設入站(套餐)",
+      "setPlanInboundsTitle": "「{name}」的預設入站",
+      "planInbounds": "預設入站",
+      "planInboundsHint": "在該分組下新建使用者時,會自動掛到這些入站。",
+      "planSaved": "預設入站已儲存",
       "title": "群組",
       "name": "名稱",
       "clientCount": "客戶端",

@@ -84,6 +84,7 @@ interface ClientFormModalProps {
   attachedIds?: number[];
   tgBotEnable?: boolean;
   groups?: string[];
+  groupDefaults?: Record<string, number[]>;
   save: (
     payload: Record<string, unknown> | SaveCreatePayload,
     meta: SaveMetaEdit | SaveMetaCreate,
@@ -177,6 +178,7 @@ export default function ClientFormModal({
   attachedIds = [],
   tgBotEnable = false,
   groups = [],
+  groupDefaults = {},
   save,
   resetTraffic,
   setLoginPassword,
@@ -693,7 +695,16 @@ export default function ClientFormModal({
                             value={form.group}
                             placeholder={t('pages.clients.groupPlaceholder')}
                             options={groups.map((g) => ({ value: g }))}
-                            onChange={(v) => update('group', v ?? '')}
+                            onChange={(v) => {
+                              const g = v ?? '';
+                              update('group', g);
+                              if (!isEdit) {
+                                const defs = groupDefaults[g];
+                                if (defs && defs.length && (form.inboundIds?.length ?? 0) === 0) {
+                                  update('inboundIds', defs);
+                                }
+                              }
+                            }}
                             allowClear
                           />
                         </Form.Item>
@@ -722,7 +733,7 @@ export default function ClientFormModal({
                       </Row>
                     )}
 
-                    <Form.Item label={t('pages.clients.attachedInbounds')} required={!isEdit}>
+                    <Form.Item label={t('pages.clients.attachedInbounds')} extra={t('pages.clients.attachedInboundsOptional')}>
                       <SelectAllClearButtons
                         options={inboundOptions}
                         value={form.inboundIds}

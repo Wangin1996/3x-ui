@@ -715,6 +715,13 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/clients/groups/setInbounds',
+        summary: 'Set a group\'s default inbound set — the "plan / tier" a new client is auto-attached to when created in this group. Auto-creates the group if it does not exist. Stored as a JSON array of inbound ids on client_groups.',
+        body: '{\n  "name": "vip",\n  "inboundIds": [1, 3]\n}',
+        response: '{\n  "success": true,\n  "obj": {\n    "name": "vip"\n  }\n}',
+      },
+      {
+        method: 'POST',
         path: '/panel/api/clients/bulkAttach',
         summary: 'Attach many existing clients to many inbounds in one call. Each client keeps its identity (email/UUID/password/subId) and a shared traffic row; all clients are added to a target inbound in a single AddInboundClient call. Clients already present on a target are reported under skipped. Returns per-email attached/skipped/errors lists and triggers a single Xray restart if any target inbound was running.',
         params: [

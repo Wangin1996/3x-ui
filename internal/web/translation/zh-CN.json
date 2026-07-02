@@ -749,6 +749,7 @@
       "sniffingDestOverride": "目标覆盖"
     },
     "clients": {
+      "attachedInboundsOptional": "可选 —— 留空并选择分组/套餐可自动挂载,也可稍后再挂。",
       "portalPassword": {
         "button": "登录密码",
         "title": "设置用户中心登录密码",
@@ -963,6 +964,11 @@
       }
     },
     "groups": {
+      "setPlanInbounds": "默认入站(套餐)",
+      "setPlanInboundsTitle": "「{name}」的默认入站",
+      "planInbounds": "默认入站",
+      "planInboundsHint": "在该分组下新建用户时,会自动挂到这些入站。",
+      "planSaved": "默认入站已保存",
       "title": "分组",
       "name": "名称",
       "clientCount": "客户端",

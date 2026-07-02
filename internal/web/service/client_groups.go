@@ -11,11 +11,60 @@ import (
 )
 
 type GroupSummary struct {
-	Name        string `json:"name"`
-	ClientCount int    `json:"clientCount"`
-	TrafficUsed int64  `json:"trafficUsed"`
-	Up          int64  `json:"up"`
-	Down        int64  `json:"down"`
+	Name            string `json:"name"`
+	ClientCount     int    `json:"clientCount"`
+	TrafficUsed     int64  `json:"trafficUsed"`
+	Up              int64  `json:"up"`
+	Down            int64  `json:"down"`
+	DefaultInbounds []int  `json:"defaultInbounds"`
+}
+
+// parseInboundIds decodes a group's stored default-inbounds JSON to a slice.
+func parseInboundIds(raw string) []int {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+	var ids []int
+	if err := json.Unmarshal([]byte(raw), &ids); err != nil {
+		return nil
+	}
+	return ids
+}
+
+// SetGroupInbounds stores the default inbound set for a group, creating the group
+// if it does not exist yet.
+func (s *ClientService) SetGroupInbounds(name string, inboundIds []int) error {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return common.NewError("group name is required")
+	}
+	if inboundIds == nil {
+		inboundIds = []int{}
+	}
+	encoded, err := json.Marshal(inboundIds)
+	if err != nil {
+		return err
+	}
+	db := database.GetDB()
+	var count int64
+	if err := db.Model(&model.ClientGroup{}).Where("name = ?", name).Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return db.Create(&model.ClientGroup{Name: name, DefaultInbounds: string(encoded)}).Error
+	}
+	return db.Model(&model.ClientGroup{}).Where("name = ?", name).
+		Update("default_inbounds", string(encoded)).Error
+}
+
+// GroupDefaultInbounds returns the configured default inbound ids for a group.
+func (s *ClientService) GroupDefaultInbounds(name string) ([]int, error) {
+	var g model.ClientGroup
+	if err := database.GetDB().Where("name = ?", strings.TrimSpace(name)).First(&g).Error; err != nil {
+		return nil, err
+	}
+	return parseInboundIds(g.DefaultInbounds), nil
 }
 
 func (s *ClientService) ListGroups() ([]GroupSummary, error) {
@@ -42,11 +91,13 @@ func (s *ClientService) ListGroups() ([]GroupSummary, error) {
 	}
 	baseUp := make(map[string]int64, len(stored))
 	baseDown := make(map[string]int64, len(stored))
+	defaultInbounds := make(map[string][]int, len(stored))
 	merged := make(map[string]groupAgg, len(derived)+len(stored))
 	for _, g := range stored {
 		merged[g.Name] = groupAgg{}
 		baseUp[g.Name] = g.ResetUp
 		baseDown[g.Name] = g.ResetDown
+		defaultInbounds[g.Name] = parseInboundIds(g.DefaultInbounds)
 	}
 	for _, g := range derived {
 		merged[g.Name] = groupAgg{count: g.ClientCount, up: g.Up, down: g.Down}
@@ -61,7 +112,7 @@ func (s *ClientService) ListGroups() ([]GroupSummary, error) {
 		if down < 0 {
 			down = 0
 		}
-		out = append(out, GroupSummary{Name: name, ClientCount: agg.count, TrafficUsed: up + down, Up: up, Down: down})
+		out = append(out, GroupSummary{Name: name, ClientCount: agg.count, TrafficUsed: up + down, Up: up, Down: down, DefaultInbounds: defaultInbounds[name]})
 	}
 	sort.Slice(out, func(i, j int) bool {
 		return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name)

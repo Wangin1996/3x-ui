@@ -29,6 +29,7 @@ func (a *GroupController) initRouter(g *gin.RouterGroup) {
 	g.POST("/groups/resetTraffic", a.resetTraffic)
 	g.POST("/groups/bulkAdd", a.bulkAdd)
 	g.POST("/groups/bulkRemove", a.bulkRemove)
+	g.POST("/groups/setInbounds", a.setInbounds)
 }
 
 func (a *GroupController) list(c *gin.Context) {
@@ -61,6 +62,25 @@ func (a *GroupController) create(c *gin.Context) {
 		return
 	}
 	if err := a.clientService.CreateGroup(body.Name); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	jsonObj(c, gin.H{"name": body.Name}, nil)
+	notifyClientsChanged()
+}
+
+type groupInboundsBody struct {
+	Name       string `json:"name"`
+	InboundIds []int  `json:"inboundIds"`
+}
+
+func (a *GroupController) setInbounds(c *gin.Context) {
+	var body groupInboundsBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if err := a.clientService.SetGroupInbounds(body.Name, body.InboundIds); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}

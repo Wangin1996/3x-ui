@@ -749,6 +749,7 @@
       "sniffingDestOverride": "宛先のオーバーライド"
     },
     "clients": {
+      "attachedInboundsOptional": "Optional — leave empty and pick a group/plan to auto-attach, or attach later.",
       "portalPassword": {
         "button": "Login password",
         "title": "Set portal login password",
@@ -963,6 +964,11 @@
       }
     },
     "groups": {
+      "setPlanInbounds": "Default inbounds (plan)",
+      "setPlanInboundsTitle": "Default inbounds for \"{name}\"",
+      "planInbounds": "Default inbounds",
+      "planInboundsHint": "New users created in this group are auto-attached to these inbounds.",
+      "planSaved": "Default inbounds saved",
       "title": "グループ",
       "name": "名前",
       "clientCount": "クライアント",

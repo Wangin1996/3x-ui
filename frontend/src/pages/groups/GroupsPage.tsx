@@ -12,6 +12,7 @@ import {
   Modal,
   Result,
   Row,
+  Select,
   Space,
   Spin,
   Statistic,
@@ -22,6 +23,7 @@ import {
 } from 'antd';
 import type { MenuProps, TableColumnsType } from 'antd';
 import {
+  ApiOutlined,
   ArrowDownOutlined,
   ArrowUpOutlined,
   ClockCircleOutlined,
@@ -131,6 +133,48 @@ export default function GroupsPage() {
       HttpUtil.post('/panel/api/clients/groups/resetTraffic', body, JSON_HEADERS),
     onSuccess: (msg) => { if (msg?.success) invalidate(); },
   });
+
+  const setInboundsMut = useMutation({
+    mutationFn: (body: { name: string; inboundIds: number[] }) =>
+      HttpUtil.post('/panel/api/clients/groups/setInbounds', body, JSON_HEADERS),
+    onSuccess: (msg) => { if (msg?.success) { invalidate(); queryClient.invalidateQueries({ queryKey: keys.clients.groups() }); } },
+  });
+
+  const inboundOptionsQuery = useQuery({
+    queryKey: ['inbound-options'],
+    queryFn: async () => {
+      const msg = await HttpUtil.get<{ id: number; tag: string; protocol: string; port: number }[]>(
+        '/panel/api/inbounds/options', undefined, { silent: true });
+      return (msg?.success && Array.isArray(msg.obj)) ? msg.obj : [];
+    },
+    staleTime: 30_000,
+  });
+  const inboundOptions = useMemo(
+    () => (inboundOptionsQuery.data ?? []).map((ib) => ({
+      label: `${ib.tag} (${ib.protocol}@${ib.port})`,
+      value: ib.id,
+    })),
+    [inboundOptionsQuery.data],
+  );
+
+  const [inboundsOpen, setInboundsOpen] = useState(false);
+  const [inboundsTarget, setInboundsTarget] = useState<GroupSummary | null>(null);
+  const [selectedInbounds, setSelectedInbounds] = useState<number[]>([]);
+
+  function openSetInbounds(g: GroupSummary) {
+    setInboundsTarget(g);
+    setSelectedInbounds(g.defaultInbounds ?? []);
+    setInboundsOpen(true);
+  }
+
+  async function confirmSetInbounds() {
+    if (!inboundsTarget) return;
+    const msg = await setInboundsMut.mutateAsync({ name: inboundsTarget.name, inboundIds: selectedInbounds });
+    if (msg?.success) {
+      messageApi.success(t('pages.groups.planSaved'));
+      setInboundsOpen(false);
+    }
+  }
 
   const [createOpen, setCreateOpen] = useState(false);
   const [createName, setCreateName] = useState('');
@@ -364,6 +408,12 @@ export default function GroupsPage() {
         onClick: () => openAddClientsFor(row),
       },
       {
+        key: 'setInbounds',
+        icon: <ApiOutlined />,
+        label: t('pages.groups.setPlanInbounds'),
+        onClick: () => openSetInbounds(row),
+      },
+      {
         key: 'rename',
         icon: <EditOutlined />,
         label: t('pages.groups.rename'),
@@ -593,6 +643,32 @@ export default function GroupsPage() {
                 onPressEnter={confirmRename}
                 placeholder={t('pages.clients.groupPlaceholder')}
                 autoFocus
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        <Modal
+          open={inboundsOpen}
+          title={inboundsTarget ? t('pages.groups.setPlanInboundsTitle', { name: inboundsTarget.name }) : ''}
+          okText={t('save')}
+          cancelText={t('cancel')}
+          confirmLoading={setInboundsMut.isPending}
+          onCancel={() => setInboundsOpen(false)}
+          onOk={confirmSetInbounds}
+          destroyOnHidden
+        >
+          <Form layout="vertical">
+            <Form.Item label={t('pages.groups.planInbounds')} extra={t('pages.groups.planInboundsHint')}>
+              <Select
+                mode="multiple"
+                value={selectedInbounds}
+                onChange={setSelectedInbounds}
+                options={inboundOptions}
+                loading={inboundOptionsQuery.isFetching}
+                style={{ width: '100%' }}
+                placeholder={t('pages.groups.planInbounds')}
+                optionFilterProp="label"
               />
             </Form.Item>
           </Form>
