@@ -15,14 +15,6 @@ export class AllSetting {
   trafficDiff = 0;
   remarkTemplate = '{{INBOUND}}-{{EMAIL}}|📊{{TRAFFIC_LEFT}}|⏳{{DAYS_LEFT}}D';
   datepicker: 'gregorian' | 'jalalian' = 'gregorian';
-  tgBotEnable = false;
-  tgBotToken = '';
-  tgBotAPIServer = '';
-  tgBotChatId = '';
-  tgRunTime = '@daily';
-  tgBotBackup = false;
-  tgCpu = 80;
-  tgMemory = 80;
   tgLang = 'en-US';
   twoFactorEnable = false;
   twoFactorToken = '';
@@ -86,7 +78,6 @@ export class AllSetting {
   ldapDefaultTotalGB = 0;
   ldapDefaultExpiryDays = 0;
   ldapDefaultLimitIP = 0;
-  tgEnabledEvents = '';
   smtpEnable = false;
   smtpHost = '';
   smtpPort = 587;
@@ -97,7 +88,6 @@ export class AllSetting {
   smtpEnabledEvents = '';
   smtpCpu = 80;
   smtpMemory = 80;
-  hasTgBotToken = false;
   hasTwoFactorToken = false;
   hasLdapPassword = false;
   hasApiToken = false;
@@ -109,8 +99,6 @@ export class AllSetting {
     if (data != null) {
       ObjectUtil.cloneProps(this, data);
     }
-    const cpu = Math.round(Number(this.tgCpu));
-    this.tgCpu = Number.isFinite(cpu) ? Math.min(100, Math.max(0, cpu)) : 80;
   }
 
   equals(other: AllSetting): boolean {

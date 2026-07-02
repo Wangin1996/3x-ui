@@ -318,52 +318,8 @@
             "minimum": 0,
             "type": "integer"
           },
-          "tgBotAPIServer": {
-            "description": "Custom API server for Telegram bot",
-            "type": "string"
-          },
-          "tgBotBackup": {
-            "description": "Enable database backup via Telegram",
-            "type": "boolean"
-          },
-          "tgBotChatId": {
-            "description": "Telegram chat ID for notifications",
-            "type": "string"
-          },
-          "tgBotEnable": {
-            "description": "Telegram bot settings\nEnable Telegram bot notifications",
-            "type": "boolean"
-          },
-          "tgBotProxy": {
-            "description": "Proxy URL for Telegram bot",
-            "type": "string"
-          },
-          "tgBotToken": {
-            "description": "Telegram bot token",
-            "type": "string"
-          },
-          "tgCpu": {
-            "description": "CPU usage threshold for alerts (percent)",
-            "maximum": 100,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "tgEnabledEvents": {
-            "description": "Comma-separated event types to send via Telegram",
-            "type": "string"
-          },
           "tgLang": {
-            "description": "Telegram bot language",
-            "type": "string"
-          },
-          "tgMemory": {
-            "description": "Memory usage threshold for alerts (percent)",
-            "maximum": 100,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "tgRunTime": {
-            "description": "Cron schedule for Telegram notifications",
+            "description": "Telegram bot settings\nBackend/subscription-page language",
             "type": "string"
           },
           "timeLocation": {
@@ -493,17 +449,7 @@
           "subTitle",
           "subURI",
           "subUpdates",
-          "tgBotAPIServer",
-          "tgBotBackup",
-          "tgBotChatId",
-          "tgBotEnable",
-          "tgBotProxy",
-          "tgBotToken",
-          "tgCpu",
-          "tgEnabledEvents",
           "tgLang",
-          "tgMemory",
-          "tgRunTime",
           "timeLocation",
           "trafficDiff",
           "trustedProxyCIDRs",
@@ -549,9 +495,6 @@
             "type": "boolean"
           },
           "hasSmtpPassword": {
-            "type": "boolean"
-          },
-          "hasTgBotToken": {
             "type": "boolean"
           },
           "hasTwoFactorToken": {
@@ -832,52 +775,8 @@
             "minimum": 0,
             "type": "integer"
           },
-          "tgBotAPIServer": {
-            "description": "Custom API server for Telegram bot",
-            "type": "string"
-          },
-          "tgBotBackup": {
-            "description": "Enable database backup via Telegram",
-            "type": "boolean"
-          },
-          "tgBotChatId": {
-            "description": "Telegram chat ID for notifications",
-            "type": "string"
-          },
-          "tgBotEnable": {
-            "description": "Telegram bot settings\nEnable Telegram bot notifications",
-            "type": "boolean"
-          },
-          "tgBotProxy": {
-            "description": "Proxy URL for Telegram bot",
-            "type": "string"
-          },
-          "tgBotToken": {
-            "description": "Telegram bot token",
-            "type": "string"
-          },
-          "tgCpu": {
-            "description": "CPU usage threshold for alerts (percent)",
-            "maximum": 100,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "tgEnabledEvents": {
-            "description": "Comma-separated event types to send via Telegram",
-            "type": "string"
-          },
           "tgLang": {
-            "description": "Telegram bot language",
-            "type": "string"
-          },
-          "tgMemory": {
-            "description": "Memory usage threshold for alerts (percent)",
-            "maximum": 100,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "tgRunTime": {
-            "description": "Cron schedule for Telegram notifications",
+            "description": "Telegram bot settings\nBackend/subscription-page language",
             "type": "string"
           },
           "timeLocation": {
@@ -943,7 +842,6 @@
           "hasLdapPassword",
           "hasNordSecret",
           "hasSmtpPassword",
-          "hasTgBotToken",
           "hasTwoFactorToken",
           "hasWarpSecret",
           "ldapAutoCreate",
@@ -1014,17 +912,7 @@
           "subTitle",
           "subURI",
           "subUpdates",
-          "tgBotAPIServer",
-          "tgBotBackup",
-          "tgBotChatId",
-          "tgBotEnable",
-          "tgBotProxy",
-          "tgBotToken",
-          "tgCpu",
-          "tgEnabledEvents",
           "tgLang",
-          "tgMemory",
-          "tgRunTime",
           "timeLocation",
           "trafficDiff",
           "trustedProxyCIDRs",
@@ -2397,10 +2285,6 @@
     {
       "name": "Hosts",
       "description": "Per-inbound override endpoints. Each enabled host renders one extra subscription link/proxy with its own address/port/TLS, superseding the legacy externalProxy array. All endpoints under /panel/api/hosts."
-    },
-    {
-      "name": "Backup",
-      "description": "Operations that interact with the configured Telegram bot."
     },
     {
       "name": "Settings",
@@ -8696,36 +8580,6 @@
         }
       }
     },
-    "/panel/api/backuptotgbot": {
-      "post": {
-        "tags": [
-          "Backup"
-        ],
-        "summary": "Send a fresh DB backup to every Telegram chat configured as an admin recipient. No body, no params.",
-        "operationId": "post_panel_api_backuptotgbot",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/panel/api/setting/all": {
       "post": {
         "tags": [
@@ -8954,40 +8808,6 @@
                   "success": true,
                   "stage": "send",
                   "msg": "Test email sent successfully"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/panel/api/setting/testTgBot": {
-      "post": {
-        "tags": [
-          "Settings"
-        ],
-        "summary": "Test Telegram bot connection by sending a test message to the configured chat.",
-        "operationId": "post_panel_api_setting_testTgBot",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "msg": {
-                      "type": "string"
-                    },
-                    "obj": {}
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "msg": "Test message sent to Telegram"
                 }
               }
             }

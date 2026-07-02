@@ -59,15 +59,6 @@ var defaultValueMap = map[string]string{
 	"trafficDiff":                 "0",
 	"remarkTemplate":              "{{INBOUND}}-{{EMAIL}}|📊{{TRAFFIC_LEFT}}|⏳{{DAYS_LEFT}}D",
 	"timeLocation":                "Local",
-	"tgBotEnable":                 "false",
-	"tgBotToken":                  "",
-	"tgBotProxy":                  "",
-	"tgBotAPIServer":              "",
-	"tgBotChatId":                 "",
-	"tgRunTime":                   "@daily",
-	"tgBotBackup":                 "false",
-	"tgCpu":                       "80",
-	"tgMemory":                    "80",
 	"tgLang":                      "en-US",
 	"twoFactorEnable":             "false",
 	"twoFactorToken":              "",
@@ -138,7 +129,6 @@ var defaultValueMap = map[string]string{
 	"ldapDefaultLimitIP":     "0",
 
 	// Event bus — per-subscriber event filtering (empty = all disabled)
-	"tgEnabledEvents":   "login.attempt,cpu.high",
 	"smtpEnabledEvents": "login.attempt,cpu.high",
 	"smtpCpu":           "80",
 	"smtpMemory":        "80",
@@ -247,7 +237,6 @@ func (s *SettingService) GetAllSettingView() (*entity.AllSettingView, error) {
 		return nil, err
 	}
 	view := &entity.AllSettingView{AllSetting: *allSetting}
-	view.HasTgBotToken = secretConfigured(allSetting.TgBotToken)
 	view.HasTwoFactorToken = secretConfigured(allSetting.TwoFactorToken)
 	view.HasLdapPassword = secretConfigured(allSetting.LdapPassword)
 	view.HasWarpSecret = secretConfigured(mustString(s.GetWarp()))
@@ -257,7 +246,6 @@ func (s *SettingService) GetAllSettingView() (*entity.AllSettingView, error) {
 	if err := database.GetDB().Model(model.ApiToken{}).Where("enabled = ?", true).Count(&apiTokenCount).Error; err == nil {
 		view.HasApiToken = apiTokenCount > 0
 	}
-	view.TgBotToken = ""
 	view.TwoFactorToken = ""
 	view.LdapPassword = ""
 	view.SmtpPassword = ""
@@ -415,22 +403,6 @@ func (s *SettingService) GetWebDomain() (string, error) {
 	return s.getString("webDomain")
 }
 
-func (s *SettingService) GetTgBotToken() (string, error) {
-	return s.getString("tgBotToken")
-}
-
-func (s *SettingService) SetTgBotToken(token string) error {
-	return s.setString("tgBotToken", token)
-}
-
-func (s *SettingService) GetTgBotProxy() (string, error) {
-	return s.getString("tgBotProxy")
-}
-
-func (s *SettingService) SetTgBotProxy(token string) error {
-	return s.setString("tgBotProxy", token)
-}
-
 // GetPanelOutbound returns the Xray outbound tag the panel's own outbound
 // requests (version checks, Telegram, subscription fetches) are routed through.
 func (s *SettingService) GetPanelOutbound() (string, error) {
@@ -500,54 +472,6 @@ func (s *SettingService) NewProxiedHTTPClient(timeout time.Duration) *http.Clien
 		return &http.Client{Timeout: timeout}
 	}
 	return client
-}
-
-func (s *SettingService) GetTgBotAPIServer() (string, error) {
-	return s.getString("tgBotAPIServer")
-}
-
-func (s *SettingService) SetTgBotAPIServer(token string) error {
-	return s.setString("tgBotAPIServer", token)
-}
-
-func (s *SettingService) GetTgBotChatId() (string, error) {
-	return s.getString("tgBotChatId")
-}
-
-func (s *SettingService) SetTgBotChatId(chatIds string) error {
-	return s.setString("tgBotChatId", chatIds)
-}
-
-func (s *SettingService) GetTgbotEnabled() (bool, error) {
-	return s.getBool("tgBotEnable")
-}
-
-func (s *SettingService) SetTgbotEnabled(value bool) error {
-	return s.setBool("tgBotEnable", value)
-}
-
-func (s *SettingService) GetTgbotRuntime() (string, error) {
-	return s.getString("tgRunTime")
-}
-
-func (s *SettingService) SetTgbotRuntime(time string) error {
-	return s.setString("tgRunTime", time)
-}
-
-func (s *SettingService) GetTgBotBackup() (bool, error) {
-	return s.getBool("tgBotBackup")
-}
-
-func (s *SettingService) GetTgCpu() (int, error) {
-	return s.getInt("tgCpu")
-}
-
-func (s *SettingService) GetTgMemory() (int, error) {
-	return s.getInt("tgMemory")
-}
-
-func (s *SettingService) SetTgMemory(value int) error {
-	return s.setInt("tgMemory", value)
 }
 
 func (s *SettingService) GetTgLang() (string, error) {
@@ -998,14 +922,6 @@ func (s *SettingService) GetLdapDefaultLimitIP() (int, error) {
 
 // Event bus — per-subscriber event filtering
 
-func (s *SettingService) GetTgEnabledEvents() (string, error) {
-	return s.getString("tgEnabledEvents")
-}
-
-func (s *SettingService) SetTgEnabledEvents(events string) error {
-	return s.setString("tgEnabledEvents", events)
-}
-
 func (s *SettingService) GetSmtpEnabledEvents() (string, error) {
 	return s.getString("smtpEnabledEvents")
 }
@@ -1136,13 +1052,6 @@ func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting) error {
 }
 
 func (s *SettingService) preserveRedactedSecrets(allSetting *entity.AllSetting) error {
-	if strings.TrimSpace(allSetting.TgBotToken) == "" {
-		value, err := s.GetTgBotToken()
-		if err != nil {
-			return err
-		}
-		allSetting.TgBotToken = value
-	}
 	if strings.TrimSpace(allSetting.LdapPassword) == "" {
 		value, err := s.GetLdapPassword()
 		if err != nil {
@@ -1175,19 +1084,12 @@ func validateSettingsURLs(allSetting *entity.AllSetting) error {
 		}
 		allSetting.ExternalTrafficInformURI = u
 	}
-	if allSetting.TgBotAPIServer != "" {
-		u, err := SanitizeHTTPURL(allSetting.TgBotAPIServer)
-		if err != nil {
-			return common.NewError("telegram API server URL is invalid:", err)
-		}
-		allSetting.TgBotAPIServer = u
-	}
 	return nil
 }
 
 func (s *SettingService) UpdateSecret(key string, value string) error {
 	switch key {
-	case "tgBotToken", "ldapPassword", "twoFactorToken":
+	case "ldapPassword", "twoFactorToken":
 		return s.saveSetting(key, strings.TrimSpace(value))
 	default:
 		return common.NewError("secret key is not replaceable:", key)
@@ -1259,7 +1161,6 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		"pageSize":         func() (any, error) { return s.GetPageSize() },
 		"defaultCert":      func() (any, error) { return s.GetCertFile() },
 		"defaultKey":       func() (any, error) { return s.GetKeyFile() },
-		"tgBotEnable":      func() (any, error) { return s.GetTgbotEnabled() },
 		"subThemeDir":      func() (any, error) { return s.GetSubThemeDir() },
 		"subEnable":        func() (any, error) { return s.GetSubEnable() },
 		"subJsonEnable":    func() (any, error) { return s.GetSubJsonEnable() },

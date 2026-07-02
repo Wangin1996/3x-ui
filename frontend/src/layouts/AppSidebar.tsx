@@ -20,7 +20,6 @@ import {
   LogoutOutlined,
   MailOutlined,
   MenuOutlined,
-  MessageOutlined,
   MoonFilled,
   MoonOutlined,
   ReadOutlined,
@@ -176,7 +175,6 @@ export default function AppSidebar() {
     const children: NonNullable<MenuProps['items']> = [
       { key: '/settings#general', icon: <SettingOutlined />, label: t('pages.settings.panelSettings') },
       { key: '/settings#security', icon: <SafetyOutlined />, label: t('pages.settings.securitySettings') },
-      { key: '/settings#telegram', icon: <MessageOutlined />, label: t('pages.settings.TGBotSettings') },
       { key: '/settings#email', icon: <MailOutlined />, label: t('pages.settings.emailSettings') },
       { key: '/settings#subscription', icon: <CloudServerOutlined />, label: t('pages.settings.subSettings') },
     ];

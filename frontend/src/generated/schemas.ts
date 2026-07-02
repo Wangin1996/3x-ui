@@ -292,52 +292,8 @@ export const SCHEMAS: Record<string, unknown> = {
         "minimum": 0,
         "type": "integer"
       },
-      "tgBotAPIServer": {
-        "description": "Custom API server for Telegram bot",
-        "type": "string"
-      },
-      "tgBotBackup": {
-        "description": "Enable database backup via Telegram",
-        "type": "boolean"
-      },
-      "tgBotChatId": {
-        "description": "Telegram chat ID for notifications",
-        "type": "string"
-      },
-      "tgBotEnable": {
-        "description": "Telegram bot settings\nEnable Telegram bot notifications",
-        "type": "boolean"
-      },
-      "tgBotProxy": {
-        "description": "Proxy URL for Telegram bot",
-        "type": "string"
-      },
-      "tgBotToken": {
-        "description": "Telegram bot token",
-        "type": "string"
-      },
-      "tgCpu": {
-        "description": "CPU usage threshold for alerts (percent)",
-        "maximum": 100,
-        "minimum": 0,
-        "type": "integer"
-      },
-      "tgEnabledEvents": {
-        "description": "Comma-separated event types to send via Telegram",
-        "type": "string"
-      },
       "tgLang": {
-        "description": "Telegram bot language",
-        "type": "string"
-      },
-      "tgMemory": {
-        "description": "Memory usage threshold for alerts (percent)",
-        "maximum": 100,
-        "minimum": 0,
-        "type": "integer"
-      },
-      "tgRunTime": {
-        "description": "Cron schedule for Telegram notifications",
+        "description": "Telegram bot settings\nBackend/subscription-page language",
         "type": "string"
       },
       "timeLocation": {
@@ -467,17 +423,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subTitle",
       "subURI",
       "subUpdates",
-      "tgBotAPIServer",
-      "tgBotBackup",
-      "tgBotChatId",
-      "tgBotEnable",
-      "tgBotProxy",
-      "tgBotToken",
-      "tgCpu",
-      "tgEnabledEvents",
       "tgLang",
-      "tgMemory",
-      "tgRunTime",
       "timeLocation",
       "trafficDiff",
       "trustedProxyCIDRs",
@@ -523,9 +469,6 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "boolean"
       },
       "hasSmtpPassword": {
-        "type": "boolean"
-      },
-      "hasTgBotToken": {
         "type": "boolean"
       },
       "hasTwoFactorToken": {
@@ -806,52 +749,8 @@ export const SCHEMAS: Record<string, unknown> = {
         "minimum": 0,
         "type": "integer"
       },
-      "tgBotAPIServer": {
-        "description": "Custom API server for Telegram bot",
-        "type": "string"
-      },
-      "tgBotBackup": {
-        "description": "Enable database backup via Telegram",
-        "type": "boolean"
-      },
-      "tgBotChatId": {
-        "description": "Telegram chat ID for notifications",
-        "type": "string"
-      },
-      "tgBotEnable": {
-        "description": "Telegram bot settings\nEnable Telegram bot notifications",
-        "type": "boolean"
-      },
-      "tgBotProxy": {
-        "description": "Proxy URL for Telegram bot",
-        "type": "string"
-      },
-      "tgBotToken": {
-        "description": "Telegram bot token",
-        "type": "string"
-      },
-      "tgCpu": {
-        "description": "CPU usage threshold for alerts (percent)",
-        "maximum": 100,
-        "minimum": 0,
-        "type": "integer"
-      },
-      "tgEnabledEvents": {
-        "description": "Comma-separated event types to send via Telegram",
-        "type": "string"
-      },
       "tgLang": {
-        "description": "Telegram bot language",
-        "type": "string"
-      },
-      "tgMemory": {
-        "description": "Memory usage threshold for alerts (percent)",
-        "maximum": 100,
-        "minimum": 0,
-        "type": "integer"
-      },
-      "tgRunTime": {
-        "description": "Cron schedule for Telegram notifications",
+        "description": "Telegram bot settings\nBackend/subscription-page language",
         "type": "string"
       },
       "timeLocation": {
@@ -917,7 +816,6 @@ export const SCHEMAS: Record<string, unknown> = {
       "hasLdapPassword",
       "hasNordSecret",
       "hasSmtpPassword",
-      "hasTgBotToken",
       "hasTwoFactorToken",
       "hasWarpSecret",
       "ldapAutoCreate",
@@ -988,17 +886,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subTitle",
       "subURI",
       "subUpdates",
-      "tgBotAPIServer",
-      "tgBotBackup",
-      "tgBotChatId",
-      "tgBotEnable",
-      "tgBotProxy",
-      "tgBotToken",
-      "tgCpu",
-      "tgEnabledEvents",
       "tgLang",
-      "tgMemory",
-      "tgRunTime",
       "timeLocation",
       "trafficDiff",
       "trustedProxyCIDRs",

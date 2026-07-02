@@ -5,15 +5,35 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/tgbot"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
 
 	"github.com/gin-gonic/gin"
 )
+
+// eventBus is wired from the web layer so login attempts can be published to the
+// bus (the email notifier subscribes to them). Nil-safe: notifications are
+// simply skipped when no bus is configured.
+var eventBus *eventbus.Bus
+
+// SetEventBus wires the shared event bus into the controller package.
+func SetEventBus(b *eventbus.Bus) { eventBus = b }
+
+func publishLoginAttempt(username, ip, timeStr, status, reason string) {
+	if eventBus == nil {
+		return
+	}
+	eventBus.Publish(eventbus.Event{
+		Type:      eventbus.EventLoginAttempt,
+		Source:    ip,
+		Data:      &eventbus.LoginEventData{Username: username, IP: ip, Time: timeStr, Status: status, Reason: reason},
+		Timestamp: time.Now(),
+	})
+}
 
 // LoginForm represents the login request structure.
 type LoginForm struct {
@@ -28,7 +48,6 @@ type IndexController struct {
 
 	settingService service.SettingService
 	userService    panel.UserService
-	tgbot          tgbot.Tgbot
 }
 
 // NewIndexController creates a new IndexController and initializes its routes.
@@ -81,13 +100,7 @@ func (a *IndexController) login(c *gin.Context) {
 	if blockedUntil, ok := defaultLoginLimiter.allow(remoteIP, form.Username); !ok {
 		reason := "too many failed attempts"
 		logger.Warningf("failed login: username=%q, IP=%q, reason=%q, blocked_until=%s", safeUser, remoteIP, reason, blockedUntil.Format(time.RFC3339))
-		a.tgbot.UserLoginNotify(tgbot.LoginAttempt{
-			Username: safeUser,
-			IP:       remoteIP,
-			Time:     timeStr,
-			Status:   tgbot.LoginFail,
-			Reason:   reason,
-		})
+		publishLoginAttempt(safeUser, remoteIP, timeStr, "fail", reason)
 		pureJsonMsg(c, http.StatusOK, false, I18nWeb(c, "pages.login.toasts.wrongUsernameOrPassword"))
 		return
 	}
@@ -101,25 +114,14 @@ func (a *IndexController) login(c *gin.Context) {
 		} else {
 			logger.Warningf("failed login: username=%q, IP=%q, reason=%q", safeUser, remoteIP, reason)
 		}
-		a.tgbot.UserLoginNotify(tgbot.LoginAttempt{
-			Username: safeUser,
-			IP:       remoteIP,
-			Time:     timeStr,
-			Status:   tgbot.LoginFail,
-			Reason:   reason,
-		})
+		publishLoginAttempt(safeUser, remoteIP, timeStr, "fail", reason)
 		pureJsonMsg(c, http.StatusOK, false, I18nWeb(c, "pages.login.toasts.wrongUsernameOrPassword"))
 		return
 	}
 
 	defaultLoginLimiter.registerSuccess(remoteIP, form.Username)
 	logger.Infof("%s logged in successfully, Ip Address: %s\n", safeUser, remoteIP)
-	a.tgbot.UserLoginNotify(tgbot.LoginAttempt{
-		Username: safeUser,
-		IP:       remoteIP,
-		Time:     timeStr,
-		Status:   tgbot.LoginSuccess,
-	})
+	publishLoginAttempt(safeUser, remoteIP, timeStr, "success", "")
 
 	if err := session.SetLoginUser(c, user); err != nil {
 		logger.Warning("Unable to save session:", err)

@@ -1102,19 +1102,6 @@ export const sections: readonly Section[] = [
   },
 
   {
-    id: 'backup',
-    title: 'Backup',
-    description: 'Operations that interact with the configured Telegram bot.',
-    endpoints: [
-      {
-        method: 'POST',
-        path: '/panel/api/backuptotgbot',
-        summary: 'Send a fresh DB backup to every Telegram chat configured as an admin recipient. No body, no params.',
-      },
-    ],
-  },
-
-  {
     id: 'settings',
     title: 'Settings',
     description:
@@ -1159,12 +1146,6 @@ export const sections: readonly Section[] = [
         path: '/panel/api/setting/testSmtp',
         summary: 'Test SMTP connection with stage-by-stage reporting (connect, auth, send). Returns structured result with stage and message.',
         response: '{\n  "success": true,\n  "stage": "send",\n  "msg": "Test email sent successfully"\n}',
-      },
-      {
-        method: 'POST',
-        path: '/panel/api/setting/testTgBot',
-        summary: 'Test Telegram bot connection by sending a test message to the configured chat.',
-        response: '{\n  "success": true,\n  "msg": "Test message sent to Telegram"\n}',
       },
       {
         method: 'GET',

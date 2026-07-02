@@ -23,7 +23,6 @@ func TestJobCadencesAreValidCronSpecs(t *testing.T) {
 		"cadenceNodeHeartbeat": cadenceNodeHeartbeat,
 		"cadenceNodeTraffic":   cadenceNodeTraffic,
 		"cadenceOutboundSub":   cadenceOutboundSub,
-		"cadenceCheckHash":     cadenceCheckHash,
 		"cadenceCPUAlarm":      cadenceCPUAlarm,
 	}
 	for name, spec := range cadences {

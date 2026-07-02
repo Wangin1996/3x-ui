@@ -26,7 +26,6 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/web/global"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/tgbot"
 
 	"github.com/joho/godotenv"
 	"github.com/op/go-logging"
@@ -147,10 +146,6 @@ func runWebServer() {
 				stopTunnelHealthMonitor()
 			}
 
-			// --- FIX FOR TELEGRAM BOT CONFLICT (409) on full shutdown ---
-			tgbot.StopBot()
-			// ------------------------------------------------------------
-
 			_ = server.Stop()
 			log.Println("Shutting down servers.")
 			return
@@ -224,64 +219,6 @@ func showSetting(show bool) {
 		fmt.Println("hasDefaultCredential:", hasDefaultCredential)
 		fmt.Println("port:", port)
 		fmt.Println("webBasePath:", webBasePath)
-	}
-}
-
-// updateTgbotEnableSts enables or disables the Telegram bot notifications based on the status parameter.
-func updateTgbotEnableSts(status bool) {
-	settingService := service.SettingService{}
-	currentTgSts, err := settingService.GetTgbotEnabled()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	logger.Infof("current enabletgbot status[%v],need update to status[%v]", currentTgSts, status)
-	if currentTgSts != status {
-		err := settingService.SetTgbotEnabled(status)
-		if err != nil {
-			fmt.Println(err)
-			return
-		} else {
-			logger.Infof("SetTgbotEnabled[%v] success", status)
-		}
-	}
-}
-
-// updateTgbotSetting updates Telegram bot settings including token, chat ID, and runtime schedule.
-func updateTgbotSetting(tgBotToken string, tgBotChatid string, tgBotRuntime string) {
-	err := database.InitDB(config.GetDBPath())
-	if err != nil {
-		fmt.Println("Error initializing database:", err)
-		return
-	}
-
-	settingService := service.SettingService{}
-
-	if tgBotToken != "" {
-		err := settingService.SetTgBotToken(tgBotToken)
-		if err != nil {
-			fmt.Printf("Error setting Telegram bot token: %v\n", err)
-			return
-		}
-		logger.Info("Successfully updated Telegram bot token.")
-	}
-
-	if tgBotRuntime != "" {
-		err := settingService.SetTgbotRuntime(tgBotRuntime)
-		if err != nil {
-			fmt.Printf("Error setting Telegram bot runtime: %v\n", err)
-			return
-		}
-		logger.Infof("Successfully updated Telegram bot runtime to [%s].", tgBotRuntime)
-	}
-
-	if tgBotChatid != "" {
-		err := settingService.SetTgBotChatId(tgBotChatid)
-		if err != nil {
-			fmt.Printf("Error setting Telegram bot chat ID: %v\n", err)
-			return
-		}
-		logger.Info("Successfully updated Telegram bot chat ID.")
 	}
 }
 
@@ -525,10 +462,6 @@ func main() {
 	var getListen bool
 	var webCertFile string
 	var webKeyFile string
-	var tgbottoken string
-	var tgbotchatid string
-	var enabletgbot bool
-	var tgbotRuntime string
 	var reset bool
 	var show bool
 	var getCert bool
@@ -547,10 +480,6 @@ func main() {
 	settingCmd.BoolVar(&getApiToken, "getApiToken", false, "Display current API token")
 	settingCmd.StringVar(&webCertFile, "webCert", "", "Set path to public key file for panel")
 	settingCmd.StringVar(&webKeyFile, "webCertKey", "", "Set path to private key file for panel")
-	settingCmd.StringVar(&tgbottoken, "tgbottoken", "", "Set token for Telegram bot")
-	settingCmd.StringVar(&tgbotRuntime, "tgbotRuntime", "", "Set cron time for Telegram bot notifications")
-	settingCmd.StringVar(&tgbotchatid, "tgbotchatid", "", "Set chat ID for Telegram bot notifications")
-	settingCmd.BoolVar(&enabletgbot, "enabletgbot", false, "Enable notifications via Telegram bot")
 
 	oldUsage := flag.Usage
 	flag.Usage = func() {
@@ -642,12 +571,6 @@ func main() {
 		}
 		if getApiToken {
 			GetApiToken(getApiToken)
-		}
-		if (tgbottoken != "") || (tgbotchatid != "") || (tgbotRuntime != "") {
-			updateTgbotSetting(tgbottoken, tgbotchatid, tgbotRuntime)
-		}
-		if enabletgbot {
-			updateTgbotEnableSts(enabletgbot)
 		}
 	case "cert":
 		err := settingCmd.Parse(os.Args[2:])
